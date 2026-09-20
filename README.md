@@ -2,7 +2,7 @@
 
 A browser practice rack for the Moog **Mother-32**, **DFAM**, and **Subharmonicon**:
 simulated panels with patch cables, adaptive coaching, a wiring view, a
-pattern editor, and take recording with WAV and patch-log export.
+pattern editor, undo and redo, and take recording with WAV and patch-log export.
 
 **Live:** https://saberkhan372.github.io/3MoogSynthsPracticeApp/
 

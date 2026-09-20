@@ -8,7 +8,8 @@
   const mother32Patterns = window.MOOG_MOTHER32_PATTERNS;
   const mother32EditorApi = window.MOOG_MOTHER32_EDITOR;
   const recorderApi = window.MOOG_AUDIO_RECORDER;
-  if (!appData || !coachApi || !polyrhythm || !workletSource || !mother32Patterns || !mother32EditorApi || !recorderApi) {
+  const historyApi = window.MOOG_HISTORY;
+  if (!appData || !coachApi || !polyrhythm || !workletSource || !mother32Patterns || !mother32EditorApi || !recorderApi || !historyApi) {
     document.body.textContent = 'The local runtime bundle is incomplete.';
     return;
   }
@@ -84,6 +85,8 @@
   const targetLocator = document.querySelector('#targetLocator');
   const appHeader = document.querySelector('.app-header');
   const cancelPatchButton = document.querySelector('#cancelPatchBtn');
+  const undoButton = document.querySelector('#undoBtn');
+  const redoButton = document.querySelector('#redoBtn');
   const knobPopover = document.createElement('div');
   knobPopover.id = 'knobValuePopover';
   knobPopover.className = 'knob-popover';
@@ -215,6 +218,10 @@
   coachSessionModel = restoreCoachProgress();
   let activeKnobDrag = null;
   let activeKnobEditor = null;
+  // Reversible edits: control values and the cable list. Session-only by design, so it
+  // is never written into a save. Applying an entry must not record a new one.
+  let editHistory = historyApi.createHistory();
+  let applyingHistory = false;
   let activeCoachCue = null;
   let patchIdCounter = 0;
   const signalFlowApi = window.MOOG_SIGNAL_FLOW;
@@ -543,7 +550,12 @@
   function persistCoachProgress() {
     renderRecipeCard();
     const summary = coachEngine.summarizeProgress(coachSessionModel);
-    coachProgressText.textContent = `${summary.explored} of ${summary.total} concepts explored`;
+    // Say what actually happened. Showing an explanation is not the learner exploring
+    // anything, so exposure and action are reported as the separate things they are.
+    const parts = [`${summary.tried} of ${summary.total} concepts tried`];
+    if (summary.introduced > summary.tried) parts.push(`${summary.introduced} explained`);
+    if (summary.known > 0) parts.push(`${summary.known} marked known`);
+    coachProgressText.textContent = parts.join(' · ');
     guidanceSelect.value = coachSessionModel.guidanceLevel;
     const progress = coachApi.exportProgress(coachSessionModel);
     const signature = JSON.stringify(progress);
@@ -1947,7 +1959,9 @@
       to,
       colorIndex: projectState.patches.length % cableColors.length
     };
+    const cablesBefore = projectState.patches.map(entry => ({ ...entry }));
     projectState.patches.push(patch);
+    recordCableChange('the new cable', cablesBefore);
     setStatus(`Patched ${endpointKey(from)} → ${endpointKey(to)}.`, 'success');
     updateSummary();
     drawCables();
@@ -2012,6 +2026,90 @@
       displayValue: displayParameterValue(definition, after),
       gesture,
       gestureStartContextTime: startContextTime
+    });
+    // Every parameter write in the app reaches setParameterValue, and every deliberate
+    // one is reported here, so this is the only hook undo needs for controls.
+    if (applyingHistory) return;
+    editHistory = historyApi.record(editHistory, {
+      kind: 'parameter',
+      instrumentId,
+      parameterId: targetId,
+      label: `${appData.specs[instrumentId].name} ${definition.name}`,
+      before,
+      after,
+      gesture,
+      at: performance.now()
+    });
+    syncHistoryControls();
+  }
+
+  // Restores the cable list wholesale, which covers add, remove, and clear alike.
+  function applyPatchList(patches) {
+    projectState.patches = patches.map(patch => ({ ...patch }));
+    clearPatchSelectionState();
+    refreshSelection();
+    updateSummary();
+    drawCables();
+    syncAudioPatches();
+  }
+
+  function recordCableChange(label, before) {
+    if (applyingHistory) return;
+    editHistory = historyApi.record(editHistory, {
+      kind: 'cables', label, before, after: projectState.patches, at: performance.now()
+    });
+    syncHistoryControls();
+  }
+
+  function syncHistoryControls() {
+    const undoLabel = historyApi.describe(editHistory, 'undo');
+    const redoLabel = historyApi.describe(editHistory, 'redo');
+    undoButton.disabled = !undoLabel;
+    redoButton.disabled = !redoLabel;
+    undoButton.title = undoLabel ? `Undo ${undoLabel}` : 'Nothing to undo';
+    redoButton.title = redoLabel ? `Redo ${redoLabel}` : 'Nothing to redo';
+    undoButton.setAttribute('aria-label', undoButton.title);
+    redoButton.setAttribute('aria-label', redoButton.title);
+  }
+
+  function applyHistoryEntry(entry, direction) {
+    const value = direction === 'undo' ? entry.before : entry.after;
+    applyingHistory = true;
+    try {
+      if (entry.kind === 'parameter') {
+        const control = rack.querySelector(
+          `.control[data-instrument-id="${entry.instrumentId}"][data-parameter-id="${
+            CSS.escape ? CSS.escape(entry.parameterId) : entry.parameterId}"]`
+        );
+        if (control) setParameterValue(control, value);
+        else {
+          projectState.instruments[entry.instrumentId].parameters[entry.parameterId] = value;
+          scheduleAudioParameter(entry.instrumentId, entry.parameterId, value);
+        }
+      } else {
+        applyPatchList(value);
+      }
+    } finally {
+      applyingHistory = false;
+    }
+  }
+
+  function stepHistory(direction) {
+    const step = direction === 'undo'
+      ? historyApi.undo(editHistory)
+      : historyApi.redo(editHistory);
+    if (!step) return;
+    editHistory = step.history;
+    applyHistoryEntry(step.entry, direction);
+    syncHistoryControls();
+    const verb = direction === 'undo' ? 'Undid' : 'Redid';
+    setStatus(`${verb} ${step.entry.label}.`, 'success');
+    // A restoration is one semantic project change. It is not a replay of the gestures
+    // that produced the original value, and the log must not imply that it is.
+    recordAction({
+      type: 'project',
+      title: direction === 'undo' ? 'Undo' : 'Redo',
+      message: `${verb} ${step.entry.label}.`
     });
   }
 
@@ -2706,6 +2804,11 @@
 
   function applyState(next, message) {
     releasePerformanceHolds();
+    // Load and import replace the project wholesale, so earlier entries describe a
+    // project that no longer exists. Reversing them would produce nonsense; the history
+    // is dropped rather than left pointing at the wrong thing.
+    editHistory = historyApi.clear(editHistory);
+    syncHistoryControls();
     projectState = next;
     patternRestartPending = true;
     patternEditor.refresh();
@@ -3339,7 +3442,9 @@
     const patchId = event.target.dataset.patchId;
     if (!patchId) return;
     const removedPatch = projectState.patches.find(patch => patch.id === patchId);
+    const cablesBefore = projectState.patches.map(patch => ({ ...patch }));
     projectState.patches = projectState.patches.filter(patch => patch.id !== patchId);
+    recordCableChange('removing that cable', cablesBefore);
     syncAudioPatches();
     updateSummary();
     drawCables();
@@ -3426,7 +3531,9 @@
     if (importInput.files?.[0]) importProject(importInput.files[0]);
   });
   document.querySelector('#clearBtn').addEventListener('click', () => {
+    const cablesBefore = projectState.patches.map(patch => ({ ...patch }));
     projectState.patches = [];
+    recordCableChange('Clear Cables', cablesBefore);
     clearPatchSelectionState();
     refreshSelection();
     updateSummary();
@@ -3469,10 +3576,26 @@
     });
   }
   startAudioButton.addEventListener('click', toggleAudio);
+  undoButton.addEventListener('click', () => stepHistory('undo'));
+  redoButton.addEventListener('click', () => stepHistory('redo'));
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape' || (!selectedOutput && !selectedInput)) return;
     event.preventDefault();
     cancelPatchSelection();
+  });
+  document.addEventListener('keydown', event => {
+    if (!(event.metaKey || event.ctrlKey) || event.altKey) return;
+    // Typed value entry and any other text field own their own undo stack.
+    const target = event.target;
+    if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement ||
+      target?.isContentEditable) return;
+    const key = event.key.toLowerCase();
+    const direction = key === 'z'
+      ? (event.shiftKey ? 'redo' : 'undo')
+      : (key === 'y' && !event.shiftKey ? 'redo' : null);
+    if (!direction) return;
+    event.preventDefault();
+    stepHistory(direction);
   });
   window.addEventListener('resize', scheduleCableDraw);
   window.addEventListener('scroll', scheduleCableDraw, true);
@@ -3489,6 +3612,7 @@
     assertRuntimeContract();
     renderRack();
     updateSummary();
+    syncHistoryControls();
     persistCoachProgress();
     showStarterHint();
     clearAnalysisViews();

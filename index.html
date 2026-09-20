@@ -1380,6 +1380,8 @@
     </div>
     <nav class="toolbar" aria-label="Project controls">
       <button id="startAudioBtn" type="button">Start Audio</button>
+      <button id="undoBtn" type="button" disabled>Undo</button>
+      <button id="redoBtn" type="button" disabled>Redo</button>
       <button id="saveBtn" type="button">Save Local</button>
       <button id="loadBtn" type="button">Load Local</button>
       <button id="exportBtn" type="button">Export JSON</button>
@@ -1552,6 +1554,7 @@
   <script src="app/runtime-data.js"></script>
   <script src="app/coach-engine.js"></script>
   <script src="app/polyrhythm.js"></script>
+  <script src="app/history.js"></script>
   <script src="app/mother32-patterns.js"></script>
   <script src="app/mother32-pattern-editor.js"></script>
   <script src="app/worklet-source.js"></script>

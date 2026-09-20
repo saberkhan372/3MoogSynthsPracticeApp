@@ -22,7 +22,19 @@
     coach: { rungTouches: 3, proactiveGap: 3, alternates: 2 },
     teach: { rungTouches: 2, proactiveGap: 1, alternates: 4 }
   });
-  const PROGRESS_SCHEMA_VERSION = 1;
+  const PROGRESS_SCHEMA_VERSION = 2;
+  // Version 1 stored only { rung, known }, which conflated "we explained this" with
+  // "the learner did something". Version 2 keeps rung as the content-selection stage
+  // and records the evidence separately.
+  const NO_PROGRESS = Object.freeze({
+    rung: 0,
+    known: false,
+    // An explanation was displayed. Exposure only; never implies the learner acted.
+    introduced: false,
+    // A control or jack belonging to the concept was actually operated.
+    tried: false
+  });
+  const SUPPORTED_PROGRESS_VERSIONS = new Set([1, PROGRESS_SCHEMA_VERSION]);
   const MAX_RUNG = 5;
   const RECENT_LIMIT = 32;
   const CUE_COOLDOWN = 12;
@@ -71,8 +83,14 @@
 
   function exportProgress(model) {
     const concepts = Object.fromEntries(Object.entries(model.concepts ?? {})
-      .filter(([, progress]) => progress.rung > 0 || progress.known)
-      .map(([id, progress]) => [id, { rung: progress.rung, known: Boolean(progress.known) }]));
+      .filter(([, progress]) => progress.rung > 0 || progress.known ||
+        progress.introduced || progress.tried)
+      .map(([id, progress]) => [id, {
+        rung: progress.rung,
+        known: Boolean(progress.known),
+        introduced: Boolean(progress.introduced),
+        tried: Boolean(progress.tried)
+      }]));
     return {
       schemaVersion: PROGRESS_SCHEMA_VERSION,
       guidanceLevel: model.guidanceLevel,
@@ -87,9 +105,12 @@
   // catalog entries) are dropped, rungs are clamped, and anything malformed starts fresh.
   function importProgress(data, options = {}) {
     if (!data || typeof data !== 'object' || Array.isArray(data) ||
-      data.schemaVersion !== PROGRESS_SCHEMA_VERSION) {
+      !SUPPORTED_PROGRESS_VERSIONS.has(data.schemaVersion)) {
       return createSessionModel();
     }
+    // A version 1 rung records only that content was shown, so it seeds exposure. It is
+    // never read as evidence the learner tried or understood anything.
+    const migrating = data.schemaVersion < PROGRESS_SCHEMA_VERSION;
     const conceptIds = options.conceptIds ? new Set(options.conceptIds) : null;
     const ideaIds = options.ideaIds ? new Set(options.ideaIds) : null;
     const recipeIds = options.recipeIds ? new Set(options.recipeIds) : null;
@@ -98,9 +119,12 @@
       for (const [id, progress] of Object.entries(data.concepts)) {
         if (conceptIds && !conceptIds.has(id)) continue;
         if (!progress || typeof progress !== 'object' || !Number.isFinite(progress.rung)) continue;
+        const rung = Math.max(0, Math.min(MAX_RUNG, Math.round(progress.rung)));
         concepts[id] = {
-          rung: Math.max(0, Math.min(MAX_RUNG, Math.round(progress.rung))),
-          known: progress.known === true
+          rung,
+          known: progress.known === true,
+          introduced: migrating ? rung > 0 : progress.introduced === true,
+          tried: migrating ? false : progress.tried === true
         };
       }
     }
@@ -1239,7 +1263,7 @@
     }
 
     const progressOf = (model, conceptId) => {
-      const progress = model.concepts[conceptId] ?? { rung: 0, known: false };
+      const progress = model.concepts[conceptId] ?? NO_PROGRESS;
       return { ...progress, rung: progress.known ? Math.max(progress.rung, 3) : progress.rung };
     };
     const touchesOf = (model, conceptId) =>
@@ -1589,9 +1613,20 @@
       let conceptState = model.concepts;
       let conceptTouches = model.conceptTouches;
       let lastProgressAt = model.lastProgressAt;
+      // Any displayed explanation that names a concept is exposure, whether or not it
+      // also advances the content stage. It is never evidence the learner tried or
+      // understood anything: only operating a control sets tried, and only the learner
+      // saying so sets known.
+      const introducedId = cue.progress?.conceptId ?? cue.concept ?? null;
+      if (introducedId) {
+        const current = conceptState[introducedId] ?? NO_PROGRESS;
+        if (!current.introduced) {
+          conceptState = { ...conceptState, [introducedId]: { ...current, introduced: true } };
+        }
+      }
       if (cue.progress) {
         const { conceptId, rung } = cue.progress;
-        const current = conceptState[conceptId] ?? { rung: 0, known: false };
+        const current = conceptState[conceptId] ?? NO_PROGRESS;
         if (rung > current.rung) {
           conceptState = { ...conceptState, [conceptId]: { ...current, rung } };
           conceptTouches = {
@@ -1698,8 +1733,11 @@
         let next = { ...model };
         const conceptId = cue.concept;
         if (action.verdict === 'know' && conceptId) {
-          const current = model.concepts[conceptId] ?? { rung: 0, known: false };
-          next.concepts = { ...model.concepts, [conceptId]: { rung: Math.max(current.rung, 3), known: true } };
+          const current = model.concepts[conceptId] ?? NO_PROGRESS;
+          next.concepts = {
+            ...model.concepts,
+            [conceptId]: { ...current, rung: Math.max(current.rung, 3), known: true }
+          };
         } else if (action.verdict === 'not-now') {
           next.snoozed = { ...model.snoozed, [conceptId ?? cue.id]: model.actionIndex + NOT_NOW_COOLDOWN };
         } else if (action.verdict === 'got-it' && conceptId) {
@@ -1890,9 +1928,14 @@
           const instruments = touches.instruments.includes(action.instrumentId)
             ? touches.instruments
             : [...touches.instruments, action.instrumentId];
+          const tried = model.concepts[concept.id] ?? NO_PROGRESS;
           model = createSessionModel({
             ...model,
             conceptCounts: { ...model.conceptCounts, [concept.id]: (model.conceptCounts[concept.id] ?? 0) + 1 },
+            // Operating the concept's own control is the only thing that marks it tried.
+            concepts: tried.tried
+              ? model.concepts
+              : { ...model.concepts, [concept.id]: { ...tried, tried: true } },
             conceptTouches: {
               ...model.conceptTouches,
               [concept.id]: { total: touches.total + 1, sinceRung: touches.sinceRung + 1, instruments }
@@ -1955,13 +1998,20 @@
       return decide(model, candidates, action, lens);
     }
 
+    // Exposure, action, and self-report are reported separately. Demonstrated
+    // application needs a task predicate and is not claimed by this engine.
     function summarizeProgress(model) {
       const ids = catalogConceptIds.length ? catalogConceptIds : concepts.map(concept => concept.id);
-      const explored = ids.filter(id => {
+      const count = predicate => ids.filter(id => {
         const progress = model.concepts[id];
-        return progress && (progress.rung > 0 || progress.known);
+        return Boolean(progress) && predicate(progress);
       }).length;
-      return Object.freeze({ explored, total: ids.length });
+      return Object.freeze({
+        introduced: count(progress => progress.introduced || progress.rung > 0),
+        tried: count(progress => progress.tried),
+        known: count(progress => progress.known),
+        total: ids.length
+      });
     }
 
     return Object.freeze({
