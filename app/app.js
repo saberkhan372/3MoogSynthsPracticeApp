@@ -89,7 +89,43 @@
   knobPopover.className = 'knob-popover';
   knobPopover.setAttribute('role', 'tooltip');
   knobPopover.hidden = true;
+  // The popover is the only place a pointer user learns how far a drag travels, so it
+  // carries the live value, the distance from where the gesture started, and a meter
+  // showing how fine the current pointer position has made the knob.
+  const knobPopoverValue = document.createElement('span');
+  knobPopoverValue.className = 'knob-popover__value';
+  const knobPopoverDelta = document.createElement('span');
+  knobPopoverDelta.className = 'knob-popover__delta';
+  const knobPopoverMeter = document.createElement('span');
+  knobPopoverMeter.className = 'knob-popover__meter';
+  const knobPopoverMeterFill = document.createElement('span');
+  knobPopoverMeterFill.className = 'knob-popover__meter-fill';
+  knobPopoverMeter.append(knobPopoverMeterFill);
+  const knobPopoverHint = document.createElement('span');
+  knobPopoverHint.className = 'knob-popover__hint';
+  knobPopover.append(knobPopoverValue, knobPopoverDelta, knobPopoverMeter, knobPopoverHint);
   document.body.append(knobPopover);
+
+  // Typed entry is a separate element from the read-only popover because it has to take
+  // focus and keystrokes, which a `pointer-events: none` tooltip cannot.
+  const knobEditor = document.createElement('form');
+  knobEditor.className = 'knob-editor';
+  knobEditor.hidden = true;
+  const knobEditorLabel = document.createElement('label');
+  knobEditorLabel.className = 'knob-editor__label';
+  knobEditorLabel.htmlFor = 'knobEditorInput';
+  const knobEditorInput = document.createElement('input');
+  knobEditorInput.id = 'knobEditorInput';
+  knobEditorInput.className = 'knob-editor__input';
+  knobEditorInput.type = 'text';
+  knobEditorInput.autocomplete = 'off';
+  knobEditorInput.spellcheck = false;
+  const knobEditorHint = document.createElement('span');
+  knobEditorHint.className = 'knob-editor__hint';
+  knobEditorHint.id = 'knobEditorHint';
+  knobEditorInput.setAttribute('aria-describedby', knobEditorHint.id);
+  knobEditor.append(knobEditorLabel, knobEditorInput, knobEditorHint);
+  document.body.append(knobEditor);
   const panelHint = document.createElement('div');
   panelHint.className = 'panel-hint';
   panelHint.setAttribute('aria-hidden', 'true');
@@ -178,6 +214,7 @@
   let coachSessionModel = coachApi.createSessionModel();
   coachSessionModel = restoreCoachProgress();
   let activeKnobDrag = null;
+  let activeKnobEditor = null;
   let activeCoachCue = null;
   let patchIdCounter = 0;
   const signalFlowApi = window.MOOG_SIGNAL_FLOW;
@@ -692,6 +729,87 @@
       return minimum * Math.pow(maximum / minimum, directedValue);
     }
     return minimum + directedValue * (maximum - minimum);
+  }
+
+  // Inverse of normalizedToPlainValue, so a typed value lands on exactly the knob
+  // position that would print it back.
+  function plainToNormalizedValue(definition, plainValue) {
+    const range = mappedPlainRange(definition);
+    if (!range || !Number.isFinite(plainValue)) return null;
+    const [minimum, maximum] = range;
+    let directedValue;
+    if (definition.taper === 'exp' && minimum > 0 && maximum > 0) {
+      directedValue = plainValue <= 0
+        ? 0
+        : Math.log(plainValue / minimum) / Math.log(maximum / minimum);
+    } else if (maximum === minimum) {
+      directedValue = 0;
+    } else {
+      directedValue = (plainValue - minimum) / (maximum - minimum);
+    }
+    return definition.plain?.direction === 'clockwise-decreases'
+      ? 1 - directedValue
+      : directedValue;
+  }
+
+  // What the typed-entry field tells the user to type, matched to how the readout prints.
+  function entryUnitHint(definition) {
+    const unit = definition.plain?.unit;
+    if (unit === 'crossfade') return 'a mix like 30:70, or one number for the B side';
+    if (unit === 'divisor') return 'a divisor from 1 to 16';
+    if (unit === 'ratio' || unit === 'normalized' || !mappedPlainRange(definition)) {
+      return 'a percentage from 0 to 100';
+    }
+    if (unit === 'percent') return 'a percentage';
+    if (unit === 'octaves') return 'a number of octaves';
+    if (unit === 'V') return 'a voltage';
+    if (unit === 'ms') return 'a time in ms (or "0.5 s")';
+    if (unit === 'Hz') return 'a frequency in Hz (or "1.2 kHz")';
+    if (unit === 'bpm') return 'a tempo in BPM';
+    return 'a number';
+  }
+
+  // Accepts whatever the readout prints back ("440 Hz", "+2.00 oct", "30:70", "50%"),
+  // plus the words that name a position the pointer cannot land on exactly.
+  function parseControlEntry(definition, text) {
+    // The readout prefixes uncalibrated mappings with "~"; typing the readout straight
+    // back must still parse, so drop it before matching.
+    const entry = String(text).trim().toLowerCase().replace(/^[~\u2248\s]+/, '');
+    if (!entry) return null;
+    if (entry === 'default' || entry === 'def') return definition.defaultNormalized ?? 0;
+    const reversed = definition.plain?.direction === 'clockwise-decreases';
+    if (entry === 'min') return reversed ? 1 : 0;
+    if (entry === 'max') return reversed ? 0 : 1;
+    if (entry === 'center' || entry === 'centre' || entry === 'mid') {
+      return bipolarCenter(definition) ?? 0.5;
+    }
+
+    const unit = definition.plain?.unit;
+    if (unit === 'crossfade') {
+      const pair = entry.match(/^(-?[\d.]+)\s*[:\/]\s*(-?[\d.]+)$/);
+      if (pair) {
+        const left = Number(pair[1]);
+        const right = Number(pair[2]);
+        const total = left + right;
+        if (Number.isFinite(total) && total > 0) {
+          return plainToNormalizedValue(definition, right / total);
+        }
+      }
+    }
+
+    const numeric = entry.match(/-?\d*\.?\d+/);
+    if (!numeric) return null;
+    let plainValue = Number(numeric[0]);
+    if (!Number.isFinite(plainValue)) return null;
+    // A control with no published range prints a percentage of travel, so that is also
+    // what it has to accept back.
+    if (!mappedPlainRange(definition)) return plainValue / 100;
+    // kHz is not a readout unit, but it is the natural way to say a filter cutoff.
+    if (unit === 'Hz' && /k\s*(hz)?\s*$/.test(entry)) plainValue *= 1000;
+    if (unit === 'ms' && /(^|[^m])s\s*$/.test(entry)) plainValue *= 1000;
+    // These print as percentages of a 0-1 plain value, so undo that before mapping.
+    if (unit === 'ratio' || unit === 'normalized' || unit === 'crossfade') plainValue /= 100;
+    return plainToNormalizedValue(definition, plainValue);
   }
 
   function bipolarCenter(definition) {
@@ -1907,14 +2025,81 @@
     }.`;
   }
 
-  function showKnobPopover(control, clientX = null, clientY = null) {
+  // Trackpad users cannot give a knob the fine travel a physical one has, so the pointer's
+  // horizontal distance from the knob's own centre picks the resolution: over the knob
+  // body a full sweep costs KNOB_COARSE_TRAVEL_PX, and moving aside stretches that sweep
+  // out to KNOB_FINE_TRAVEL_PX. Horizontal distance is used rather than straight-line
+  // distance so that the vertical drag itself never changes the resolution mid-gesture.
+  const KNOB_COARSE_TRAVEL_PX = 200;
+  const KNOB_FINE_TRAVEL_PX = 1600;
+  const KNOB_FINE_REACH_RADII = 7;
+  const KNOB_SHIFT_FINE_FACTOR = 5;
+  // Shift on top of an already-distant pointer would otherwise ask for a sweep longer
+  // than any screen, which reads as a dead knob rather than a precise one.
+  const KNOB_MAX_TRAVEL_PX = 3200;
+
+  function knobDragPrecision(knob, clientX, shiftHeld = false) {
+    const bounds = knob.getBoundingClientRect();
+    const radius = Math.max(1, bounds.width / 2);
+    const offset = Math.abs(clientX - (bounds.left + bounds.width / 2));
+    const reach = Math.max(0, Math.min(
+      1,
+      (offset / radius - 1) / (KNOB_FINE_REACH_RADII - 1)
+    ));
+    const travelPx = Math.min(
+      KNOB_MAX_TRAVEL_PX,
+      (KNOB_COARSE_TRAVEL_PX + reach * (KNOB_FINE_TRAVEL_PX - KNOB_COARSE_TRAVEL_PX)) *
+        (shiftHeld ? KNOB_SHIFT_FINE_FACTOR : 1)
+    );
+    return {
+      reach,
+      shiftHeld,
+      travelPx,
+      tier: reach < 0.15 ? 'Coarse' : reach < 0.65 ? 'Fine' : 'Ultra fine'
+    };
+  }
+
+  function knobGestureHint(precision) {
+    if (!precision) {
+      return 'Drag ↕ to set · move aside while dragging for finer steps · ' +
+        'scroll ± 1 step · double-click to type · Alt-click to reset';
+    }
+    return `${precision.tier}${precision.shiftHeld ? ' + Shift' : ''} · ` +
+      `full sweep ≈ ${Math.round(precision.travelPx)}px · ` +
+      (precision.reach > 0.9
+        ? 'back towards the knob for coarse'
+        : 'move further from the knob for finer');
+  }
+
+  function showKnobPopover(control, clientX = null, clientY = null, drag = null) {
     const instrumentId = control.dataset.instrumentId;
     const parameterId = control.dataset.parameterId;
     const definition = definitionFor(instrumentId, parameterId);
     const value = projectState.instruments[instrumentId].parameters[parameterId];
     if (!definition || !Number.isFinite(value)) return;
+    // Opening typed entry moves the layout under the cursor, which makes the browser
+    // replay a hover; the read-only popover must not reappear behind the field.
+    if (activeKnobEditor) return;
 
-    knobPopover.textContent = `${definition.name} · ${displayParameterValue(definition, value)}`;
+    knobPopoverValue.textContent =
+      `${definition.name} · ${displayParameterValue(definition, value)}`;
+    const startValue = drag?.startValue;
+    const moved = Number.isFinite(startValue) && Math.abs(value - startValue) > 0.0005;
+    // A whole percent would round every fine drag down to a frozen "0%".
+    const sweepPercent = Math.abs(value - startValue) * 100;
+    knobPopoverDelta.textContent = moved
+      ? `from ${displayParameterValue(definition, startValue)} ` +
+        `(${value > startValue ? '+' : '−'}${
+          sweepPercent < 10 ? sweepPercent.toFixed(1) : Math.round(sweepPercent)
+        }% of sweep)`
+      : '';
+    knobPopoverDelta.hidden = !moved;
+    const precision = drag?.precision ?? null;
+    knobPopoverMeter.hidden = !precision;
+    if (precision) {
+      knobPopoverMeterFill.style.width = `${Math.round(precision.reach * 100)}%`;
+    }
+    knobPopoverHint.textContent = knobGestureHint(precision);
     knobPopover.style.setProperty('--instrument-color', colors[instrumentId]);
     knobPopover.hidden = false;
     const controlBounds = control.querySelector('.control__knob').getBoundingClientRect();
@@ -1938,6 +2123,97 @@
   function hideKnobPopover() {
     knobPopover.hidden = true;
   }
+
+  function positionKnobEditor(control) {
+    const bounds = control.querySelector('.control__knob').getBoundingClientRect();
+    const editorBounds = knobEditor.getBoundingClientRect();
+    const left = Math.max(8, Math.min(
+      window.innerWidth - editorBounds.width - 8,
+      bounds.left + bounds.width / 2 - editorBounds.width / 2
+    ));
+    // Prefer sitting above the knob, but drop below it rather than off the top edge.
+    const above = bounds.top - editorBounds.height - 10;
+    const top = above >= 8 ? above : Math.min(
+      window.innerHeight - editorBounds.height - 8,
+      bounds.bottom + 10
+    );
+    knobEditor.style.left = `${left}px`;
+    knobEditor.style.top = `${top}px`;
+  }
+
+  function openKnobEditor(control) {
+    const instrumentId = control.dataset.instrumentId;
+    const parameterId = control.dataset.parameterId;
+    const definition = definitionFor(instrumentId, parameterId);
+    const value = projectState.instruments[instrumentId].parameters[parameterId];
+    if (!definition || !Number.isFinite(value)) return;
+    hideKnobPopover();
+    activeKnobEditor = {
+      control,
+      startValue: value,
+      startContextTime: audioContext?.currentTime ?? null
+    };
+    knobEditor.style.setProperty('--instrument-color', colors[instrumentId]);
+    knobEditorLabel.textContent = `${appData.specs[instrumentId].name} ${definition.name}`;
+    knobEditorHint.textContent = `Type ${entryUnitHint(definition)}, or ` +
+      'min / max / center / default. Enter applies, Esc cancels.';
+    // The readout's "~" marks an uncalibrated mapping; a field you are about to type an
+    // exact request into should not start with it.
+    knobEditorInput.value = displayParameterValue(definition, value).replace(/^~/, '');
+    knobEditor.hidden = false;
+    positionKnobEditor(control);
+    knobEditorInput.focus();
+    knobEditorInput.select();
+  }
+
+  function closeKnobEditor({ restoreFocus = false } = {}) {
+    if (!activeKnobEditor) return;
+    const { control } = activeKnobEditor;
+    activeKnobEditor = null;
+    knobEditor.hidden = true;
+    if (restoreFocus) control.querySelector('.control__knob')?.focus({ preventScroll: true });
+  }
+
+  function commitKnobEditor() {
+    if (!activeKnobEditor) return;
+    const { control, startValue, startContextTime } = activeKnobEditor;
+    const definition = definitionFor(
+      control.dataset.instrumentId,
+      control.dataset.parameterId
+    );
+    const parsed = parseControlEntry(definition, knobEditorInput.value);
+    if (parsed === null || !Number.isFinite(parsed)) {
+      knobEditor.dataset.invalid = 'true';
+      knobEditorHint.textContent = `"${knobEditorInput.value.trim()}" is not ` +
+        `${entryUnitHint(definition)}. Try again, or min / max / center / default.`;
+      knobEditorInput.select();
+      return;
+    }
+    delete knobEditor.dataset.invalid;
+    setParameterValue(control, parsed);
+    closeKnobEditor({ restoreFocus: true });
+    setStatus(controlValueMessage(control), 'success');
+    recordControlChange(control, startValue, 'typed', startContextTime);
+  }
+
+  knobEditor.addEventListener('submit', event => {
+    event.preventDefault();
+    commitKnobEditor();
+  });
+
+  knobEditorInput.addEventListener('input', () => {
+    delete knobEditor.dataset.invalid;
+  });
+
+  knobEditorInput.addEventListener('keydown', event => {
+    // The rack and document both listen for Escape; typed entry claims it first.
+    if (event.key !== 'Escape') return;
+    event.preventDefault();
+    event.stopPropagation();
+    closeKnobEditor({ restoreFocus: true });
+  });
+
+  knobEditorInput.addEventListener('blur', () => closeKnobEditor());
 
   function adjustControlByStep(control, direction, multiplier = 1) {
     const instrumentId = control.dataset.instrumentId;
@@ -2747,6 +3023,21 @@
       .parameters[control.dataset.parameterId];
     event.preventDefault();
     knob.focus({ preventScroll: true });
+    // Double-click now opens typed entry, so the default reset moves to Alt-click and
+    // to the word "default" in the entry field.
+    if (event.altKey) {
+      closeKnobEditor();
+      const definition = definitionFor(
+        control.dataset.instrumentId,
+        control.dataset.parameterId
+      );
+      setParameterValue(control, definition.defaultNormalized ?? 0);
+      showKnobPopover(control, event.clientX, event.clientY);
+      setStatus(`${controlValueMessage(control)} Reset to default.`, 'success');
+      recordControlChange(control, value, 'reset');
+      return;
+    }
+    closeKnobEditor();
     knob.setPointerCapture?.(event.pointerId);
     activeKnobDrag = {
       pointerId: event.pointerId,
@@ -2755,10 +3046,11 @@
       lastY: event.clientY,
       rawValue: value,
       startValue: value,
+      precision: knobDragPrecision(knob, event.clientX, event.shiftKey),
       // A slow drag is audible long before release; the patch log keeps both times.
       startContextTime: audioContext?.currentTime ?? null
     };
-    showKnobPopover(control, event.clientX, event.clientY);
+    showKnobPopover(control, event.clientX, event.clientY, activeKnobDrag);
   });
 
   rack.addEventListener('pointermove', event => {
@@ -2781,16 +3073,26 @@
     );
     const travel = activeKnobDrag.lastY - event.clientY;
     activeKnobDrag.lastY = event.clientY;
+    activeKnobDrag.precision = knobDragPrecision(
+      activeKnobDrag.knob,
+      event.clientX,
+      event.shiftKey
+    );
     activeKnobDrag.rawValue = Math.max(0, Math.min(
       1,
-      activeKnobDrag.rawValue + travel / (200 * (event.shiftKey ? 5 : 1))
+      activeKnobDrag.rawValue + travel / activeKnobDrag.precision.travelPx
     ));
     const center = bipolarCenter(definition);
     const value = center !== null && Math.abs(activeKnobDrag.rawValue - center) <= 0.0125
       ? center
       : activeKnobDrag.rawValue;
     setParameterValue(activeKnobDrag.control, value);
-    showKnobPopover(activeKnobDrag.control, event.clientX, event.clientY);
+    showKnobPopover(
+      activeKnobDrag.control,
+      event.clientX,
+      event.clientY,
+      activeKnobDrag
+    );
   });
 
   rack.addEventListener('pointerup', finishKnobDrag);
@@ -2887,17 +3189,7 @@
     const knob = event.target.closest('.control__knob');
     if (!knob) return;
     event.preventDefault();
-    const control = knob.closest('.control[data-parameter-id]');
-    const before = projectState.instruments[control.dataset.instrumentId]
-      .parameters[control.dataset.parameterId];
-    const definition = definitionFor(
-      control.dataset.instrumentId,
-      control.dataset.parameterId
-    );
-    setParameterValue(control, definition.defaultNormalized ?? 0);
-    showKnobPopover(control, event.clientX, event.clientY);
-    setStatus(`${controlValueMessage(control)} Reset to default.`, 'success');
-    recordControlChange(control, before, 'reset');
+    openKnobEditor(knob.closest('.control[data-parameter-id]'));
   });
 
   rack.addEventListener('keydown', event => {
@@ -2910,6 +3202,13 @@
       control.dataset.instrumentId,
       control.dataset.parameterId
     );
+    // Double-click is the pointer route into typed entry; Enter is the keyboard one, so
+    // an exact value is not a pointer-only capability.
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      openKnobEditor(control);
+      return;
+    }
     if (event.key === 'Home' || event.key === 'End') {
       event.preventDefault();
       const reversed = definition.plain?.direction === 'clockwise-decreases';
