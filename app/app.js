@@ -9,7 +9,9 @@
   const mother32EditorApi = window.MOOG_MOTHER32_EDITOR;
   const recorderApi = window.MOOG_AUDIO_RECORDER;
   const historyApi = window.MOOG_HISTORY;
-  if (!appData || !coachApi || !polyrhythm || !workletSource || !mother32Patterns || !mother32EditorApi || !recorderApi || !historyApi) {
+  const variationsApi = window.MOOG_VARIATIONS;
+  const experimentsApi = window.MOOG_EXPERIMENTS;
+  if (!appData || !coachApi || !polyrhythm || !workletSource || !mother32Patterns || !mother32EditorApi || !recorderApi || !historyApi || !variationsApi || !experimentsApi) {
     document.body.textContent = 'The local runtime bundle is incomplete.';
     return;
   }
@@ -87,6 +89,26 @@
   const cancelPatchButton = document.querySelector('#cancelPatchBtn');
   const undoButton = document.querySelector('#undoBtn');
   const redoButton = document.querySelector('#redoBtn');
+  const keepButton = document.querySelector('#keepBtn');
+  const returnButton = document.querySelector('#returnBtn');
+  const intentButtons = document.querySelector('#intentButtons');
+  const intentScope = document.querySelector('#intentScope');
+  const intentLockFields = document.querySelector('#intentLocks');
+  const intentStatus = document.querySelector('#intentStatus');
+  const intentProposals = document.querySelector('#intentProposals');
+  const experimentSelect = document.querySelector('#experimentSelect');
+  const experimentIntro = document.querySelector('#experimentIntro');
+  const experimentStatus = document.querySelector('#experimentStatus');
+  const experimentBlockers = document.querySelector('#experimentBlockers');
+  const experimentPredictionField = document.querySelector('#experimentPredictionField');
+  const experimentPredictionPrompt = document.querySelector('#experimentPredictionPrompt');
+  const experimentPrediction = document.querySelector('#experimentPrediction');
+  const experimentInstruction = document.querySelector('#experimentInstruction');
+  const experimentStartButton = document.querySelector('#experimentStartBtn');
+  const experimentShowButton = document.querySelector('#experimentShowBtn');
+  const experimentCompareButton = document.querySelector('#experimentCompareBtn');
+  const experimentKeepButton = document.querySelector('#experimentKeepBtn');
+  const experimentRestoreButton = document.querySelector('#experimentRestoreBtn');
   const knobPopover = document.createElement('div');
   knobPopover.id = 'knobValuePopover';
   knobPopover.className = 'knob-popover';
@@ -135,6 +157,9 @@
   panelHint.hidden = true;
 
   let projectState = clone(appData.defaultState);
+  // One session checkpoint for fearless exploration. It deliberately stores panel,
+  // cable, and pattern settings rather than live DSP phase or held notes.
+  let keptCheckpoint = null;
   let patternEditor = null;
   let patternRestartPending = false;
   let selectedOutput = null;
@@ -147,6 +172,7 @@
   let locatorEntries = [];
   let locatorSignature = '';
   let cableDrawFrame = 0;
+  let jackNameFitWidth = -1;
   let cableResizeObserver = null;
   let audioContext = null;
   let audioTransitionPending = false;
@@ -177,37 +203,61 @@
   const activeSubharmoniconHolds = new Map();
   const activeKeyboardPads = new Map();
   const coachActionHistory = [];
+  // One set of display names for everything that talks about the rack in words.
+  const jackNamesById = Object.fromEntries(instrumentOrder.flatMap(instrumentId => (
+    appData.specs[instrumentId].patchbay.jacks.map(jack => {
+      const sources = appData.specs[instrumentId].internalSources ?? [];
+      const sourceLabel = sourceId => sources.find(source => source.id === sourceId)?.desc;
+      return [`${instrumentId}:${jack.id}`, {
+        name: jack.name,
+        dir: jack.dir,
+        normalledFrom: jack.normalledFrom,
+        normalledFromLabel: sourceLabel(jack.normalledFrom),
+        normalCondition: jack.normalCondition,
+        normalConditionLabel: sourceLabel(jack.normalCondition),
+        breaksNormal: jack.breaksNormal,
+        breaksNormalLabel: sourceLabel(jack.breaksNormal),
+        signal: jack.signal,
+        replacesLabel: sourceLabel(jack.replaces)
+      }];
+    })
+  )));
+  const instrumentNamesById = Object.fromEntries(
+    instrumentOrder.map(id => [id, appData.specs[id].name])
+  );
+  const controlNamesById = Object.fromEntries(instrumentOrder.flatMap(instrumentId => (
+    parameterDefinitions(appData.specs[instrumentId]).map(definition => [
+      `${instrumentId}:${definition.id}`,
+      { name: definition.name, sectionId: definition.sectionId }
+    ])
+  )));
   const coachEngine = coachApi.createCoachEngine({
     patchIdeas: appData.patchIdeas,
     coachCues: appData.coachCues,
-    jackNames: Object.fromEntries(instrumentOrder.flatMap(instrumentId => (
-      appData.specs[instrumentId].patchbay.jacks.map(jack => {
-        const sources = appData.specs[instrumentId].internalSources ?? [];
-        const sourceLabel = sourceId => sources.find(source => source.id === sourceId)?.desc;
-        return [`${instrumentId}:${jack.id}`, {
-          name: jack.name,
-          dir: jack.dir,
-          normalledFrom: jack.normalledFrom,
-          normalledFromLabel: sourceLabel(jack.normalledFrom),
-          normalCondition: jack.normalCondition,
-          normalConditionLabel: sourceLabel(jack.normalCondition),
-          breaksNormal: jack.breaksNormal,
-          breaksNormalLabel: sourceLabel(jack.breaksNormal),
-          signal: jack.signal,
-          replacesLabel: sourceLabel(jack.replaces)
-        }];
-      })
-    ))),
+    jackNames: jackNamesById,
     concepts: appData.concepts,
     rackRecipes: appData.rackRecipes,
-    instrumentNames: Object.fromEntries(instrumentOrder.map(id => [id, appData.specs[id].name])),
-    controlNames: Object.fromEntries(instrumentOrder.flatMap(instrumentId => (
-      parameterDefinitions(appData.specs[instrumentId]).map(definition => [
-        `${instrumentId}:${definition.id}`,
-        { name: definition.name, sectionId: definition.sectionId }
-      ])
-    )))
+    instrumentNames: instrumentNamesById,
+    controlNames: controlNamesById
   });
+  // Musical intentions. The engine proposes; applying belongs here, as one undoable
+  // transaction, and only when the player asks for it.
+  const variationEngine = variationsApi.createVariations({
+    catalog: appData.intentions,
+    manifests: appData.manifests,
+    jackNames: jackNamesById,
+    instrumentNames: instrumentNamesById,
+    controlNames: controlNamesById,
+    // Proposals are read before they are accepted, so they show panel values, not the
+    // normalized numbers the engine works in.
+    format: (instrumentId, parameterId, value) => {
+      const definition = definitionFor(instrumentId, parameterId);
+      return definition ? displayParameterValue(definition, value) : null;
+    }
+  });
+  const experimentEngine = experimentsApi.createExperiments(appData.experiments);
+  experimentSelect.replaceChildren(...experimentEngine.experiments.map(experiment =>
+    new Option(experiment.title, experiment.id)));
   // Coaching progress belongs to the learner, not the patch: its own storage key, never
   // part of project save/export, and an in-memory fallback when storage is unavailable.
   const coachProgressKey = 'moog-coach-progress-v1';
@@ -222,6 +272,16 @@
   // is never written into a save. Applying an entry must not record a new one.
   let editHistory = historyApi.createHistory();
   let applyingHistory = false;
+  // The last set of variation proposals, the intention that produced them, and the seed
+  // they were drawn with. Any edit to the rack clears them: a proposal describes the
+  // settings it was drawn against, and applying a stale one would move the wrong knobs.
+  let variationOffer = null;
+  let variationSeed = 1;
+  const variationLocks = new Set();
+  // An experiment baseline is independent of the player's manual checkpoint. It lasts
+  // until the task is kept, restored, or abandoned, including through unrelated edits.
+  let activeExperiment = null;
+  let experimentSetupBlockers = [];
   let activeCoachCue = null;
   let patchIdCounter = 0;
   const signalFlowApi = window.MOOG_SIGNAL_FLOW;
@@ -262,6 +322,10 @@
     if (appData.coachCues?.schemaVersion !== 2 ||
       !Array.isArray(appData.coachCues.cues) || !appData.coachCues.cues.length) {
       throw new Error('The coaching-cue catalog is incomplete.');
+    }
+    if (appData.experiments?.schemaVersion !== 1 ||
+      !Array.isArray(appData.experiments.experiments) || !appData.experiments.experiments.length) {
+      throw new Error('The listening-experiment catalog is incomplete.');
     }
     for (const instrumentId of instrumentOrder) {
       const spec = appData.specs[instrumentId];
@@ -534,7 +598,13 @@
     recipePathways.replaceChildren(...pathways.flatMap(pathway => {
       const heading = document.createElement('h3');
       heading.textContent = `On your rack: ${pathway.title} ✓`;
-      return [heading, ...pathway.buildOn.map(item => {
+      const recovery = document.createElement('p');
+      recovery.className = 'fine-print';
+      recovery.textContent = [
+        pathway.listeningPrompt ? `Listen: ${pathway.listeningPrompt}` : '',
+        pathway.recovery || 'Before branching, choose Keep this sound. Undo backs out one change; Return restores the checkpoint.'
+      ].filter(Boolean).join(' ');
+      return [heading, recovery, ...pathway.buildOn.map(item => {
         const button = document.createElement('button');
         button.type = 'button';
         button.dataset.buildOn = `${pathway.id}|${item.id}`;
@@ -542,6 +612,7 @@
         button.disabled = item.done || !item.available;
         button.title = item.done || item.available ? '' : 'Its input is already used by another cable.';
         button.textContent = item.done ? `Built: ${item.title}` : `Build on it: ${item.title}`;
+        button.setAttribute('aria-description', [item.result, item.listeningPrompt].filter(Boolean).join(' '));
         return button;
       })];
     }));
@@ -554,6 +625,7 @@
     // anything, so exposure and action are reported as the separate things they are.
     const parts = [`${summary.tried} of ${summary.total} concepts tried`];
     if (summary.introduced > summary.tried) parts.push(`${summary.introduced} explained`);
+    if (summary.heard > 0) parts.push(`${summary.heard} heard`);
     if (summary.known > 0) parts.push(`${summary.known} marked known`);
     coachProgressText.textContent = parts.join(' · ');
     guidanceSelect.value = coachSessionModel.guidanceLevel;
@@ -639,6 +711,13 @@
       coachRackState(),
       coachSessionModel
     );
+    // An active listening task owns the guidance surface. Keep coach progress current,
+    // but only a warning may interrupt the pinned experiment.
+    if (experimentIsActive() && outcome.cue?.kind !== 'warning') {
+      coachSessionModel = outcome.sessionModel;
+      persistCoachProgress();
+      return outcome.cue;
+    }
     applyCoachOutcome(outcome);
     return outcome.cue;
   }
@@ -1191,8 +1270,20 @@
       if (instrumentId === 'mother32') {
         patternEditor = mother32EditorApi.create({
           getBank: () => projectState.instruments.mother32.patternBank,
-          onChange: restart => {
+          onChange: (restart, beforeBank) => {
             syncAudioPattern(restart);
+            if (!applyingHistory && beforeBank) {
+              clearVariationOffer();
+              editHistory = historyApi.record(editHistory, {
+                kind: 'pattern',
+                label: restart ? 'Mother-32 pattern selection' : 'Mother-32 pattern edit',
+                before: beforeBank,
+                after: projectState.instruments.mother32.patternBank,
+                at: performance.now()
+              });
+              syncHistoryControls();
+              syncExperimentViewToProject();
+            }
             if (audioRecorder.recording) {
               audioRecorder.note({
                 type: 'pattern', instrumentId: 'mother32', restart,
@@ -1689,7 +1780,27 @@
     if (cableDrawFrame) return;
     cableDrawFrame = requestAnimationFrame(() => {
       cableDrawFrame = 0;
+      fitJackNames();
       drawCables();
+    });
+  }
+
+  // Panel legends keep their hardware wording, so a legend wider than its cell is
+  // drawn smaller rather than clipped. The ellipsis remains only below the floor.
+  function fitJackNames() {
+    const width = rack.getBoundingClientRect().width;
+    if (width === jackNameFitWidth) return;
+    jackNameFitWidth = width;
+    const names = [...rack.querySelectorAll('.jack__name')];
+    for (const name of names) name.style.removeProperty('--jack-name-fit');
+    const fits = names.map(name => {
+      if (name.scrollWidth <= name.clientWidth) return 1;
+      const padding = parseFloat(getComputedStyle(name).paddingLeft) * 2;
+      const ratio = (name.clientWidth - padding) / (name.scrollWidth - padding);
+      return Math.max(0.7, Math.floor(ratio * 0.98 * 1000) / 1000);
+    });
+    names.forEach((name, index) => {
+      if (fits[index] < 1) name.style.setProperty('--jack-name-fit', String(fits[index]));
     });
   }
 
@@ -1872,6 +1983,28 @@
     cableLayer.replaceChildren();
     wiringView?.draw(cableLayer, bounds, projectState);
 
+    // Jacks win over cables. Every jack is cut out of the cables' hit area, so a patched
+    // socket can still be hovered, armed for another cable, or chosen as a destination;
+    // a cable is removed by clicking along its run.
+    const hitClipId = 'cable-hit-clip';
+    if (projectState.patches.length) {
+      let clipPathData = `M 0 0 H ${bounds.width} V ${bounds.height} H 0 Z`;
+      for (const jack of rack.querySelectorAll('.jack')) {
+        const box = jack.getBoundingClientRect();
+        clipPathData += ` M ${box.left - bounds.left} ${box.top - bounds.top}` +
+          ` h ${box.width} v ${box.height} h ${-box.width} Z`;
+      }
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const clip = document.createElementNS('http://www.w3.org/2000/svg', 'clipPath');
+      clip.id = hitClipId;
+      const clipShape = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      clipShape.setAttribute('d', clipPathData);
+      clipShape.setAttribute('clip-rule', 'evenodd');
+      clip.append(clipShape);
+      defs.append(clip);
+      cableLayer.append(defs);
+    }
+
     for (const patch of projectState.patches) {
       const from = cableAnchor(patch.from, bounds);
       const to = cableAnchor(patch.to, bounds);
@@ -1892,6 +2025,7 @@
       hit.setAttribute('d', d);
       hit.setAttribute('class', 'cable cable--hit');
       hit.dataset.patchId = patch.id;
+      hit.setAttribute('clip-path', `url(#${hitClipId})`);
 
       const fromPlug = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
       fromPlug.setAttribute('class', 'cable--plug');
@@ -2030,6 +2164,7 @@
     // Every parameter write in the app reaches setParameterValue, and every deliberate
     // one is reported here, so this is the only hook undo needs for controls.
     if (applyingHistory) return;
+    clearVariationOffer();
     editHistory = historyApi.record(editHistory, {
       kind: 'parameter',
       instrumentId,
@@ -2041,6 +2176,9 @@
       at: performance.now()
     });
     syncHistoryControls();
+    if (!observeExperimentTarget(instrumentId, targetId, after)) {
+      syncExperimentViewToProject();
+    }
   }
 
   // Restores the cable list wholesale, which covers add, remove, and clear alike.
@@ -2051,14 +2189,17 @@
     updateSummary();
     drawCables();
     syncAudioPatches();
+    syncExperimentViewToProject();
   }
 
   function recordCableChange(label, before) {
     if (applyingHistory) return;
+    clearVariationOffer();
     editHistory = historyApi.record(editHistory, {
       kind: 'cables', label, before, after: projectState.patches, at: performance.now()
     });
     syncHistoryControls();
+    syncExperimentViewToProject();
   }
 
   function syncHistoryControls() {
@@ -2072,29 +2213,99 @@
     redoButton.setAttribute('aria-label', redoButton.title);
   }
 
+  // Writes a value to a control by id, through the panel when the control is on screen
+  // so its readout and audio follow, and straight into the project when it is not.
+  function writeParameterById(instrumentId, parameterId, value) {
+    const control = rack.querySelector(
+      `.control[data-instrument-id="${instrumentId}"][data-parameter-id="${
+        CSS.escape ? CSS.escape(parameterId) : parameterId}"]`
+    );
+    if (control) setParameterValue(control, value);
+    else {
+      projectState.instruments[instrumentId].parameters[parameterId] = value;
+      scheduleAudioParameter(instrumentId, parameterId, value);
+    }
+  }
+
   function applyHistoryEntry(entry, direction) {
-    const value = direction === 'undo' ? entry.before : entry.after;
     applyingHistory = true;
     try {
       if (entry.kind === 'parameter') {
-        const control = rack.querySelector(
-          `.control[data-instrument-id="${entry.instrumentId}"][data-parameter-id="${
-            CSS.escape ? CSS.escape(entry.parameterId) : entry.parameterId}"]`
-        );
-        if (control) setParameterValue(control, value);
-        else {
-          projectState.instruments[entry.instrumentId].parameters[entry.parameterId] = value;
-          scheduleAudioParameter(entry.instrumentId, entry.parameterId, value);
+        writeParameterById(entry.instrumentId, entry.parameterId,
+          direction === 'undo' ? entry.before : entry.after);
+      } else if (entry.kind === 'settings') {
+        for (const value of entry.values) {
+          writeParameterById(value.instrumentId, value.parameterId,
+            direction === 'undo' ? value.before : value.after);
         }
+      } else if (entry.kind === 'project') {
+        applyState(clone(direction === 'undo' ? entry.before : entry.after),
+          direction === 'undo'
+            ? `Restored the project from before ${entry.label}.`
+            : `Reapplied ${entry.label}.`,
+          { clearHistory: false });
+      } else if (entry.kind === 'pattern') {
+        projectState.instruments.mother32.patternBank = mother32Patterns.normalizeBank(
+          clone(direction === 'undo' ? entry.before : entry.after));
+        patternRestartPending = true;
+        patternEditor.refresh();
+        syncAudioPattern(true);
       } else {
-        applyPatchList(value);
+        applyPatchList(direction === 'undo' ? entry.before : entry.after);
       }
     } finally {
       applyingHistory = false;
     }
   }
 
+  function syncCheckpointControls() {
+    returnButton.disabled = !keptCheckpoint;
+    returnButton.title = keptCheckpoint
+      ? 'Return to the session checkpoint; Undo restores the settings you leave'
+      : 'Keep a sound first';
+  }
+
+  function keepCheckpoint() {
+    if (activeKnobDrag) {
+      setStatus('Release the knob before keeping this sound.', 'warning');
+      return;
+    }
+    keptCheckpoint = clone(stateForSave());
+    syncCheckpointControls();
+    setStatus('Kept this sound for the current session. Return restores these settings.', 'success');
+    recordAction({
+      type: 'project', title: 'Checkpoint kept',
+      message: 'Kept the current controls, cables, and Mother-32 patterns for this session.'
+    });
+  }
+
+  function returnToCheckpoint() {
+    if (!keptCheckpoint) return;
+    if (activeKnobDrag) {
+      setStatus('Release the knob before returning to the kept sound.', 'warning');
+      return;
+    }
+    const before = stateForSave();
+    const after = clone(keptCheckpoint);
+    editHistory = historyApi.record(editHistory, {
+      kind: 'project', label: 'Return to kept sound', before, after, at: performance.now()
+    });
+    applyState(after, 'Returned to the kept controls, cables, and patterns.', { clearHistory: false });
+    syncHistoryControls();
+    recordAction({
+      type: 'project', title: 'Checkpoint returned',
+      message: 'Returned to the kept controls, cables, and Mother-32 patterns.'
+    });
+  }
+
   function stepHistory(direction) {
+    // A knob drag tracks its own value from where it was grabbed, so it would overwrite
+    // a restoration on the next pointer move and then record a change that spans it.
+    // The gesture in progress owns the control until it is released.
+    if (activeKnobDrag) {
+      setStatus(`Release the knob before ${direction === 'undo' ? 'undoing' : 'redoing'}.`, 'warning');
+      return;
+    }
     const step = direction === 'undo'
       ? historyApi.undo(editHistory)
       : historyApi.redo(editHistory);
@@ -2102,6 +2313,8 @@
     editHistory = step.history;
     applyHistoryEntry(step.entry, direction);
     syncHistoryControls();
+    syncExperimentViewToProject();
+    clearVariationOffer();
     const verb = direction === 'undo' ? 'Undid' : 'Redid';
     setStatus(`${verb} ${step.entry.label}.`, 'success');
     // A restoration is one semantic project change. It is not a replay of the gestures
@@ -2111,6 +2324,346 @@
       title: direction === 'undo' ? 'Undo' : 'Redo',
       message: `${verb} ${step.entry.label}.`
     });
+  }
+
+  // ─── Listening experiment ──────────────────────────────────────────────────────
+
+  function experimentIsActive() {
+    return experimentEngine.isActive(activeExperiment?.session);
+  }
+
+  function experimentContext() {
+    return {
+      audioRunning: audioContext?.state === 'running',
+      transport: coachTransport
+    };
+  }
+
+  function setupExperimentPrediction(experiment) {
+    if (experimentPrediction.dataset.experimentId === experiment.id) return;
+    experimentPrediction.replaceChildren();
+    experimentPrediction.dataset.experimentId = experiment.id;
+    experimentPrediction.add(new Option('Choose if you want to predict', ''));
+    for (const prediction of experiment.predictions) {
+      experimentPrediction.add(new Option(prediction.label, prediction.id));
+    }
+  }
+
+  function selectedExperiment() {
+    return experimentEngine.get(experimentSelect.value) ?? experimentEngine.experiments[0];
+  }
+
+  function renderExperiment() {
+    const experiment = activeExperiment?.experiment ?? selectedExperiment();
+    if (!experiment) return;
+    setupExperimentPrediction(experiment);
+    const session = activeExperiment?.session ?? null;
+    const state = session?.state ?? 'offered';
+    const active = experimentEngine.isActive(session);
+    const reflecting = state === 'reflecting';
+    const terminal = experimentEngine.isTerminal(session);
+    experimentSelect.disabled = active;
+    experimentSelect.value = experiment.id;
+
+    experimentIntro.textContent = `${experiment.title}. ${experiment.summary}`;
+    experimentBlockers.replaceChildren(...experimentSetupBlockers.map(message => {
+      const item = document.createElement('li');
+      item.textContent = message;
+      return item;
+    }));
+    experimentStartButton.hidden = active;
+    experimentStartButton.textContent = terminal ? 'Run again' :
+      (experimentSetupBlockers.length ? 'Check setup again' : 'Start experiment');
+    experimentShowButton.hidden = !active;
+    experimentShowButton.textContent = `Show ${controlNamesById[`${experiment.instrumentId}:${experiment.target.controlId}`]?.name ?? experiment.target.controlId}`;
+    experimentCompareButton.hidden = !reflecting;
+    experimentKeepButton.hidden = !reflecting;
+    experimentRestoreButton.hidden = !active;
+    experimentPredictionField.hidden = !active;
+    experimentPredictionPrompt.textContent = experiment.predictionPrompt;
+    experimentPrediction.value = session?.prediction ?? '';
+
+    if (state === 'offered') {
+      experimentStatus.value = experimentSetupBlockers.length
+        ? 'The rack was not changed. Fix any setup item, then check again.'
+        : 'Optional. Starting captures a separate settings baseline; it does not replace Keep this sound.';
+      experimentInstruction.textContent = experiment.listenFor;
+      return;
+    }
+    if (state === 'trying') {
+      const definition = definitionFor(experiment.instrumentId, experiment.target.controlId);
+      const suggested = session.baselineValue <= 0.5
+        ? experiment.target.highTarget : experiment.target.lowTarget;
+      experimentStatus.value = 'Baseline captured. Change the named control by hand; unrelated edits will not complete the task.';
+      experimentInstruction.textContent = `${experiment.instruction} A clear contrast from this baseline is about ${
+        displayParameterValue(definition, suggested)}. ${experiment.listenFor}`;
+      return;
+    }
+    if (state === 'reflecting') {
+      experimentStatus.value = session.view === 'baseline'
+        ? 'Baseline is playing. The changed settings remain available.'
+        : session.view === 'changed'
+          ? 'Changed settings are playing. Compare them with the captured baseline.'
+          : 'The rack has moved beyond both snapshots. Baseline and changed settings remain available.';
+      experimentCompareButton.textContent = session.view === 'baseline'
+        ? 'Hear changed settings' : 'Compare baseline';
+      experimentInstruction.textContent = `${experiment.listenFor} Sequential recall restores settings, not oscillator or envelope phase.`;
+      return;
+    }
+    experimentStatus.value = state === 'kept'
+      ? 'Changed settings kept. The completed experiment does not judge your description.'
+      : state === 'restored'
+        ? 'Baseline restored. Undo can recover the settings that restoration displaced.'
+        : 'Experiment ended.';
+    experimentInstruction.textContent = experiment.listenFor;
+  }
+
+  function syncExperimentViewToProject() {
+    if (activeExperiment?.session.state !== 'reflecting') return;
+    const current = JSON.stringify(stateForSave());
+    const desired = current === JSON.stringify(activeExperiment.baseline)
+      ? 'baseline'
+      : current === JSON.stringify(activeExperiment.changed)
+        ? 'changed'
+        : 'current';
+    if (activeExperiment.session.view === desired) return;
+    activeExperiment.session = experimentEngine.transition(activeExperiment.session, {
+      type: `show-${desired}`
+    });
+    renderExperiment();
+  }
+
+  function beginExperiment() {
+    const experiment = selectedExperiment();
+    const result = experimentEngine.check(
+      experiment.id,
+      { instruments: projectState.instruments, patches: projectState.patches },
+      experimentContext()
+    );
+    experimentSetupBlockers = [...result.blockers];
+    if (!result.ready) {
+      activeExperiment = null;
+      renderExperiment();
+      setStatus('The listening experiment needs setup first. Nothing was changed.', 'warning');
+      return;
+    }
+    const baselineValue = projectState.instruments[experiment.instrumentId]
+      .parameters[experiment.target.controlId];
+    let session = experimentEngine.createSession(experiment.id, baselineValue);
+    session = experimentEngine.transition(session, { type: 'begin' });
+    activeExperiment = {
+      experiment,
+      session,
+      baseline: clone(stateForSave()),
+      changed: null
+    };
+    experimentSetupBlockers = [];
+    clearVariationOffer();
+    hideCoachCue();
+    renderExperiment();
+    setStatus(`${experiment.title} started. Its settings baseline is ready.`, 'success');
+    recordAction({ type: 'experiment-started', experimentId: experiment.id });
+  }
+
+  function showExperimentTarget() {
+    if (!experimentIsActive()) return;
+    const { instrumentId, target } = activeExperiment.experiment;
+    const control = rack.querySelector(
+      `.control[data-instrument-id="${instrumentId}"][data-parameter-id="${target.controlId}"]`
+    );
+    if (!control) return;
+    revealElements([control], { onlyIfHidden: true });
+    control.querySelector('[role="slider"], button')?.focus({ preventScroll: true });
+  }
+
+  function observeExperimentTarget(instrumentId, parameterId, value) {
+    if (!experimentIsActive()) return false;
+    const experiment = activeExperiment.experiment;
+    if (experiment.instrumentId !== instrumentId || experiment.target.controlId !== parameterId) return false;
+    const next = experimentEngine.transition(activeExperiment.session, {
+      type: 'target-change', value
+    });
+    if (next === activeExperiment.session) return false;
+    activeExperiment.session = next;
+    activeExperiment.changed = clone(stateForSave());
+    renderExperiment();
+    setStatus('The experiment has a clear contrast. Compare or choose which settings to keep.', 'success');
+    recordAction({ type: 'experiment-tried', experimentId: experiment.id, targetId: parameterId });
+    return true;
+  }
+
+  function applyExperimentSnapshot(snapshot, label) {
+    const before = stateForSave();
+    const changed = JSON.stringify(before) !== JSON.stringify(snapshot);
+    editHistory = historyApi.record(editHistory, {
+      kind: 'project', label, before, after: snapshot, at: performance.now()
+    });
+    applyState(clone(snapshot), label, { clearHistory: false });
+    syncHistoryControls();
+    return changed;
+  }
+
+  function compareExperiment() {
+    if (activeExperiment?.session.state !== 'reflecting') return;
+    const showBaseline = activeExperiment.session.view !== 'baseline';
+    applyExperimentSnapshot(
+      showBaseline ? activeExperiment.baseline : activeExperiment.changed,
+      showBaseline ? 'Experiment: compare baseline' : 'Experiment: hear changed settings'
+    );
+    activeExperiment.session = experimentEngine.transition(activeExperiment.session, {
+      type: showBaseline ? 'show-baseline' : 'show-changed'
+    });
+    renderExperiment();
+    recordAction({ type: 'experiment-compared', experimentId: activeExperiment.experiment.id,
+      view: activeExperiment.session.view });
+  }
+
+  function keepExperimentResult() {
+    if (activeExperiment?.session.state !== 'reflecting') return;
+    if (activeExperiment.session.view !== 'changed') {
+      applyExperimentSnapshot(activeExperiment.changed, 'Experiment: keep changed settings');
+    }
+    activeExperiment.session = experimentEngine.transition(activeExperiment.session, { type: 'keep' });
+    renderExperiment();
+    setStatus('Kept the changed experiment settings.', 'success');
+    recordAction({ type: 'experiment-kept', experimentId: activeExperiment.experiment.id });
+  }
+
+  function restoreExperimentBaseline() {
+    if (!experimentIsActive()) return;
+    const changed = applyExperimentSnapshot(
+      activeExperiment.baseline, 'Experiment: restore baseline');
+    activeExperiment.session = experimentEngine.transition(activeExperiment.session, { type: 'restore' });
+    renderExperiment();
+    setStatus(changed
+      ? 'Restored the experiment baseline. Undo recovers the settings you left.'
+      : 'The experiment baseline was already restored.', 'success');
+    recordAction({ type: 'experiment-restored', experimentId: activeExperiment.experiment.id });
+  }
+
+  // ─── Musical intentions ─────────────────────────────────────────────────────────
+
+  function renderIntentControls() {
+    intentButtons.replaceChildren(...variationEngine.intents.map(intent => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.intentId = intent.id;
+      button.textContent = intent.label;
+      button.title = intent.summary;
+      button.setAttribute('aria-pressed', String(variationOffer?.intentId === intent.id));
+      return button;
+    }));
+    if (intentLockFields.querySelector('label')) return;
+    intentLockFields.append(...variationEngine.locks.map(lock => {
+      const label = document.createElement('label');
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.dataset.lockId = lock.id;
+      // The summary is the honest part: a lock holds named settings still. It does not
+      // promise that the rhythm or the pitch you hear cannot change by another route.
+      label.title = `${lock.summary} These are settings locks, not a guarantee about what you hear.`;
+      label.append(input, document.createTextNode(lock.label.replace(/^Lock /, '')));
+      return label;
+    }));
+  }
+
+  function clearVariationOffer() {
+    if (!variationOffer) return;
+    variationOffer = null;
+    renderVariationOffer();
+  }
+
+  function renderVariationOffer() {
+    renderIntentControls();
+    const offer = variationOffer;
+    intentProposals.replaceChildren(...(offer?.proposals ?? []).map(proposal => {
+      const item = document.createElement('li');
+      item.className = 'intent-proposal';
+      const title = document.createElement('h3');
+      title.textContent = proposal.title;
+      const changes = proposal.changes.map(change => {
+        const line = document.createElement('p');
+        line.className = 'intent-proposal__change';
+        line.textContent = `${change.label}: ${change.fromText} → ${change.toText}`;
+        return line;
+      });
+      const why = document.createElement('p');
+      why.textContent = proposal.why;
+      const listen = document.createElement('p');
+      listen.className = 'intent-proposal__listen';
+      listen.textContent = `Listen for: ${proposal.listenFor}`;
+      const fit = document.createElement('p');
+      fit.className = 'fine-print';
+      fit.textContent = `${proposal.routes}${proposal.because.length
+        ? ` Offered because ${proposal.because.join(', and ')}.`
+        : ''}`;
+      const apply = document.createElement('button');
+      apply.type = 'button';
+      apply.dataset.applyProposal = proposal.id;
+      apply.textContent = 'Apply';
+      item.append(title, ...changes, why, listen, fit, apply);
+      return item;
+    }));
+    if (!offer) {
+      intentStatus.value = '';
+      return;
+    }
+    intentStatus.value = offer.proposals.length
+      ? `${offer.label} · seed ${offer.seed}. Nothing has changed yet; press the same button again for another draw.`
+      : offer.explanation;
+  }
+
+  function offerVariations(intentId) {
+    const offer = variationEngine.propose({
+      intentId,
+      rack: { instruments: projectState.instruments, patches: projectState.patches },
+      locks: [...variationLocks],
+      scope: intentScope.value,
+      // A fresh draw each time it is asked for, and the seed is shown so the same
+      // proposals can be asked for again.
+      seed: variationSeed++
+    });
+    variationOffer = offer;
+    renderVariationOffer();
+    setStatus(offer.proposals.length
+      ? `${offer.label}: ${offer.proposals.length} variation${offer.proposals.length === 1 ? '' : 's'} to read before anything changes.`
+      : offer.explanation, offer.proposals.length ? 'success' : 'warning');
+    recordAction({ type: 'intent', intentId, scope: intentScope.value, offered: offer.proposals.length });
+  }
+
+  function applyVariation(proposalId) {
+    const proposal = variationOffer?.proposals.find(item => item.id === proposalId);
+    if (!proposal) return;
+    const values = proposal.changes.map(change => ({
+      instrumentId: change.instrumentId,
+      parameterId: change.parameterId,
+      label: change.label,
+      before: projectState.instruments[change.instrumentId].parameters[change.parameterId],
+      after: change.to
+    }));
+    // One deliberate act, so one history entry: undo takes back the whole variation.
+    applyingHistory = true;
+    try {
+      for (const value of values) writeParameterById(value.instrumentId, value.parameterId, value.after);
+    } finally {
+      applyingHistory = false;
+    }
+    const label = `${variationOffer.label} · ${proposal.title}`;
+    editHistory = historyApi.record(editHistory, {
+      kind: 'settings', label, values, at: performance.now()
+    });
+    syncHistoryControls();
+    syncExperimentViewToProject();
+    const summary = proposal.changes
+      .map(change => `${change.label} ${change.fromText} → ${change.toText}`).join('; ');
+    setStatus(`${label}. Undo returns to the previous settings.`, 'success');
+    recordAction({
+      type: 'project',
+      title: 'Variation applied',
+      message: `${label}: ${summary}.`,
+      next: `Listen for: ${proposal.listenFor}`
+    });
+    clearVariationOffer();
   }
 
   function controlValueMessage(control) {
@@ -2436,9 +2989,17 @@
           : `${action.instrumentName} ${action.targetName} ${action.state}`
       };
     }
-    if (action.type === 'project' && ['Patch cleared', 'Project loaded', 'Project imported'].includes(action.title)) {
+    if (action.type === 'project') {
       // A whole-patch change: keep the resulting state so the log stays reconstructable.
-      return { type: 'project', text: action.title, state: stateForSave() };
+      if (['Patch cleared', 'Project loaded', 'Project imported'].includes(action.title)) {
+        return { type: 'project', text: action.title, state: stateForSave() };
+      }
+      // A restoration moves settings too, and the audio captures it. Log it with the
+      // move it reversed and the state it left behind, so the log does not go quiet
+      // while the recording changes.
+      if (['Undo', 'Redo', 'Variation applied', 'Checkpoint returned'].includes(action.title)) {
+        return { type: 'project', text: action.message, state: stateForSave() };
+      }
     }
     return null;
   }
@@ -2689,7 +3250,11 @@
       selectedOutput = endpoint;
       refreshSelection();
       scheduleCableDraw();
-      setStatus(`Cable armed from ${endpointLabel(endpoint)}. Choose a glowing input; Escape cancels.`, 'normal');
+      const alreadyPatched = projectState.patches.some(patch => endpointsMatch(patch.from, endpoint));
+      setStatus(`Cable armed from ${endpointLabel(endpoint)}. Choose a glowing input; Escape cancels.` +
+        (alreadyPatched
+          ? ' This output already has a cable; on hardware, split it through a MULT or a stackable cable.'
+          : ''), 'normal');
       recordAction({
         type: 'output-selected',
         instrumentId: endpoint.instrumentId,
@@ -2802,13 +3367,15 @@
     return { state: next, warnings };
   }
 
-  function applyState(next, message) {
+  function applyState(next, message, { clearHistory = true } = {}) {
     releasePerformanceHolds();
-    // Load and import replace the project wholesale, so earlier entries describe a
-    // project that no longer exists. Reversing them would produce nonsense; the history
-    // is dropped rather than left pointing at the wrong thing.
-    editHistory = historyApi.clear(editHistory);
-    syncHistoryControls();
+    // Callers choose whether a replacement starts a new history or participates in the
+    // existing one as a whole-project transaction.
+    if (clearHistory) {
+      editHistory = historyApi.clear(editHistory);
+      syncHistoryControls();
+    }
+    clearVariationOffer();
     projectState = next;
     patternRestartPending = true;
     patternEditor.refresh();
@@ -2822,6 +3389,7 @@
     setStatus(message, 'success');
     hideCoachCue();
     if (projectState.patches.length === 0) showStarterHint();
+    syncExperimentViewToProject();
   }
 
   function saveLocal() {
@@ -2846,9 +3414,15 @@
         return;
       }
       const result = normalizeImportedState(JSON.parse(stored));
+      const before = stateForSave();
+      editHistory = historyApi.record(editHistory, {
+        kind: 'project', label: 'Load local project', before, after: result.state,
+        at: performance.now()
+      });
       applyState(result.state, result.warnings.length
         ? `Loaded locally with ${result.warnings.length} migration warning(s).`
-        : 'Loaded local project.');
+        : 'Loaded local project.', { clearHistory: false });
+      syncHistoryControls();
       recordAction({
         type: 'project', title: 'Project loaded',
         message: `${result.state.patches.length} cable${result.state.patches.length === 1 ? '' : 's'} restored from local storage.`,
@@ -2884,9 +3458,15 @@
   async function importProject(file) {
     try {
       const result = normalizeImportedState(JSON.parse(await file.text()));
+      const before = stateForSave();
+      editHistory = historyApi.record(editHistory, {
+        kind: 'project', label: 'Import project', before, after: result.state,
+        at: performance.now()
+      });
       applyState(result.state, result.warnings.length
         ? `Imported with ${result.warnings.length} migration warning(s).`
-        : 'Imported project JSON.');
+        : 'Imported project JSON.', { clearHistory: false });
+      syncHistoryControls();
       recordAction({
         type: 'project', title: 'Project imported',
         message: `${result.state.patches.length} cable${result.state.patches.length === 1 ? '' : 's'} loaded from JSON.`,
@@ -3578,6 +4158,48 @@
   startAudioButton.addEventListener('click', toggleAudio);
   undoButton.addEventListener('click', () => stepHistory('undo'));
   redoButton.addEventListener('click', () => stepHistory('redo'));
+  keepButton.addEventListener('click', keepCheckpoint);
+  returnButton.addEventListener('click', returnToCheckpoint);
+  experimentStartButton.addEventListener('click', beginExperiment);
+  experimentShowButton.addEventListener('click', showExperimentTarget);
+  experimentCompareButton.addEventListener('click', compareExperiment);
+  experimentKeepButton.addEventListener('click', keepExperimentResult);
+  experimentRestoreButton.addEventListener('click', restoreExperimentBaseline);
+  experimentSelect.addEventListener('change', () => {
+    activeExperiment = null;
+    experimentSetupBlockers = [];
+    renderExperiment();
+  });
+  experimentPrediction.addEventListener('change', () => {
+    if (!experimentIsActive() || !experimentPrediction.value) return;
+    activeExperiment.session = experimentEngine.transition(activeExperiment.session, {
+      type: 'predict', prediction: experimentPrediction.value
+    });
+    renderExperiment();
+    recordAction({
+      type: 'experiment-prediction',
+      experimentId: activeExperiment.experiment.id,
+      prediction: experimentPrediction.value
+    });
+  });
+  intentButtons.addEventListener('click', event => {
+    const intentId = event.target.closest('[data-intent-id]')?.dataset.intentId;
+    if (intentId) offerVariations(intentId);
+  });
+  intentProposals.addEventListener('click', event => {
+    const proposalId = event.target.closest('[data-apply-proposal]')?.dataset.applyProposal;
+    if (proposalId) applyVariation(proposalId);
+  });
+  // Changing the scope or a lock changes the question, so the answer on screen is no
+  // longer the answer to it.
+  intentScope.addEventListener('change', clearVariationOffer);
+  intentLockFields.addEventListener('change', event => {
+    const lockId = event.target.dataset.lockId;
+    if (!lockId) return;
+    if (event.target.checked) variationLocks.add(lockId);
+    else variationLocks.delete(lockId);
+    clearVariationOffer();
+  });
   document.addEventListener('keydown', event => {
     if (event.key !== 'Escape' || (!selectedOutput && !selectedInput)) return;
     event.preventDefault();
@@ -3606,13 +4228,20 @@
     cableResizeObserver.observe(rackShell);
     cableResizeObserver.observe(rack);
   }
-  document.fonts?.ready.then(scheduleCableDraw);
+  document.fonts?.ready.then(() => {
+    // Loaded fonts change legend widths without resizing the rack.
+    jackNameFitWidth = -1;
+    scheduleCableDraw();
+  });
 
   try {
     assertRuntimeContract();
     renderRack();
     updateSummary();
     syncHistoryControls();
+    syncCheckpointControls();
+    renderVariationOffer();
+    renderExperiment();
     persistCoachProgress();
     showStarterHint();
     clearAnalysisViews();

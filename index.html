@@ -951,7 +951,8 @@
       max-width: 100%;
       padding: .08rem .1rem;
       font-family: "Arial Narrow", "Avenir Next Condensed", Impact, sans-serif;
-      font-size: .46rem;
+      /* app.js sets --jack-name-fit below 1 when a legend is wider than its cell. */
+      font-size: calc(.46rem * var(--jack-name-fit, 1));
       font-weight: 800;
       letter-spacing: .025em;
       line-height: .62rem;
@@ -1098,7 +1099,60 @@
     .coach-controls { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; justify-content: space-between; }
     .coach-controls label { display: flex; gap: .4rem; align-items: center; color: var(--muted); font-size: .72rem; }
     body[data-mode="perform"] .card--hint-actions,
-    body[data-mode="perform"] .card--coach { display: none; }
+    body[data-mode="perform"] .card--coach,
+    body[data-mode="perform"] .card--intent,
+    body[data-mode="perform"] .card--experiment { display: none; }
+    .experiment-actions { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .55rem; }
+    .experiment-actions button { min-width: auto; padding: .26rem .55rem; font-size: .7rem; }
+    .experiment-prediction { display: grid; gap: .25rem; margin-top: .55rem; color: var(--muted); font-size: .72rem; }
+    .experiment-prediction select { width: 100%; box-sizing: border-box; }
+    #experimentStatus { display: block; margin-top: .5rem; color: var(--amber); }
+    #experimentBlockers { margin: .45rem 0 0; padding-left: 1.2rem; color: #ffcbc4; font-size: .72rem; }
+    #experimentBlockers:empty { display: none; }
+
+    .intent-buttons { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .6rem; }
+    .intent-buttons button { min-width: auto; padding: .26rem .55rem; font-size: .7rem; }
+    .intent-buttons button[aria-pressed="true"] { border-color: var(--amber); color: var(--amber); }
+    .intent-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem .8rem;
+      align-items: center;
+      margin-top: .55rem;
+    }
+    .intent-controls label { display: flex; gap: .4rem; align-items: center; color: var(--muted); font-size: .72rem; }
+    .intent-controls select {
+      appearance: none;
+      padding: .22rem 1.5rem .22rem .5rem;
+      color: #fff3db;
+      background: #302e28 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23d8cfbd' stroke-width='1.4'/%3E%3C/svg%3E") no-repeat right .45rem center / .55rem;
+      border: 1px solid #5c574b;
+      border-radius: .25rem;
+      font: inherit;
+      font-size: .7rem;
+    }
+    .intent-locks { display: flex; flex-wrap: wrap; gap: .1rem .55rem; align-items: center; margin: 0; padding: 0; border: 0; }
+    .intent-locks legend { padding: 0; color: var(--muted); font-size: .68rem; }
+    .intent-locks label { display: flex; gap: .3rem; align-items: center; color: var(--muted); font-size: .7rem; }
+    #intentStatus { display: block; margin-top: .55rem; }
+    #intentStatus:empty { display: none; }
+    .intent-proposals { display: grid; gap: .5rem; margin: .55rem 0 0; padding: 0; list-style: none; }
+    .intent-proposal {
+      display: grid;
+      gap: .22rem;
+      padding: .5rem .55rem;
+      border: 1px solid #4d493f;
+      border-radius: .3rem;
+      background: #2a2823;
+      font-size: .7rem;
+      line-height: 1.4;
+      color: var(--muted);
+    }
+    .intent-proposal h3 { margin: 0; color: var(--ink); font-size: .72rem; }
+    .intent-proposal p { margin: 0; }
+    .intent-proposal__change { color: #fff3db; font-variant-numeric: tabular-nums; }
+    .intent-proposal__listen { color: var(--amber); }
+    .intent-proposal button { justify-self: start; min-width: auto; margin-top: .2rem; padding: .22rem .55rem; font-size: .68rem; }
 
     .card--warning {
       border-color: color-mix(in srgb, var(--red) 72%, #4d493f);
@@ -1382,6 +1436,8 @@
       <button id="startAudioBtn" type="button">Start Audio</button>
       <button id="undoBtn" type="button" disabled>Undo</button>
       <button id="redoBtn" type="button" disabled>Redo</button>
+      <button id="keepBtn" type="button">Keep this sound</button>
+      <button id="returnBtn" type="button" disabled>Return</button>
       <button id="saveBtn" type="button">Save Local</button>
       <button id="loadBtn" type="button">Load Local</button>
       <button id="exportBtn" type="button">Export JSON</button>
@@ -1458,7 +1514,9 @@
       <section id="hintActions" class="card card--hint-actions" aria-label="Coaching options" hidden>
         <p id="hintTrace" class="hint-trace" hidden></p>
         <div id="hintFeedback" class="hint-feedback" hidden>
-          <button id="hintGotItBtn" type="button" data-verdict="got-it">Got it</button>
+          <button id="hintGotItBtn" type="button" data-verdict="heard">I hear it</button>
+          <button id="hintNoDifferenceBtn" type="button" data-verdict="no-difference">No difference</button>
+          <button id="hintExplainBtn" type="button" data-verdict="explain">Explain another way</button>
           <button id="hintKnowBtn" type="button" data-verdict="know">I know this</button>
           <button id="hintNotNowBtn" type="button" data-verdict="not-now">Not now</button>
         </div>
@@ -1468,6 +1526,47 @@
         </details>
       </section>
       </div>
+      <section id="experimentCard" class="card card--experiment" aria-label="Listening experiment">
+        <h2>Listening experiment</h2>
+        <label for="experimentSelect">Choose a comparison
+          <select id="experimentSelect"></select>
+        </label>
+        <p id="experimentIntro" class="fine-print"></p>
+        <output id="experimentStatus" aria-live="polite"></output>
+        <ul id="experimentBlockers"></ul>
+        <label id="experimentPredictionField" class="experiment-prediction" for="experimentPrediction" hidden>
+          <span id="experimentPredictionPrompt"></span>
+          <select id="experimentPrediction"></select>
+        </label>
+        <p id="experimentInstruction" class="fine-print"></p>
+        <div class="experiment-actions">
+          <button id="experimentStartBtn" type="button">Start experiment</button>
+          <button id="experimentShowBtn" type="button" hidden>Show VCF EG Amount</button>
+          <button id="experimentCompareBtn" type="button" hidden>Compare baseline</button>
+          <button id="experimentKeepBtn" type="button" hidden>Keep changed sound</button>
+          <button id="experimentRestoreBtn" type="button" hidden>Restore baseline</button>
+        </div>
+      </section>
+      <section id="intentCard" class="card card--intent" aria-label="Musical intentions">
+        <h2>Musical intentions</h2>
+        <p class="fine-print">Optional. Each one proposes settings you can read before you accept them, and applying one is a single step you can undo. Cables, transport, patterns, and output levels are never changed.</p>
+        <div id="intentButtons" class="intent-buttons"></div>
+        <div class="intent-controls">
+          <label for="intentScope">Scope
+            <select id="intentScope">
+              <option value="rack">Whole rack</option>
+              <option value="dfam">DFAM</option>
+              <option value="mother32">Mother-32</option>
+              <option value="subharmonicon">Subharmonicon</option>
+            </select>
+          </label>
+          <fieldset id="intentLocks" class="intent-locks">
+            <legend>Hold still</legend>
+          </fieldset>
+        </div>
+        <output id="intentStatus" class="fine-print" aria-live="polite"></output>
+        <ol id="intentProposals" class="intent-proposals"></ol>
+      </section>
       <section id="recipeCard" class="card card--recipes">
         <div class="card__heading">
           <h2>Patch all three</h2>
@@ -1555,6 +1654,8 @@
   <script src="app/coach-engine.js"></script>
   <script src="app/polyrhythm.js"></script>
   <script src="app/history.js"></script>
+  <script src="app/variations.js"></script>
+  <script src="app/experiments.js"></script>
   <script src="app/mother32-patterns.js"></script>
   <script src="app/mother32-pattern-editor.js"></script>
   <script src="app/worklet-source.js"></script>

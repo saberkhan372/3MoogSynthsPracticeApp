@@ -22,19 +22,22 @@
     coach: { rungTouches: 3, proactiveGap: 3, alternates: 2 },
     teach: { rungTouches: 2, proactiveGap: 1, alternates: 4 }
   });
-  const PROGRESS_SCHEMA_VERSION = 2;
+  const PROGRESS_SCHEMA_VERSION = 3;
   // Version 1 stored only { rung, known }, which conflated "we explained this" with
   // "the learner did something". Version 2 keeps rung as the content-selection stage
   // and records the evidence separately.
   const NO_PROGRESS = Object.freeze({
     rung: 0,
     known: false,
+    // The player explicitly reported hearing the change. This is separate from both
+    // operating the control and claiming conceptual understanding.
+    heard: false,
     // An explanation was displayed. Exposure only; never implies the learner acted.
     introduced: false,
     // A control or jack belonging to the concept was actually operated.
     tried: false
   });
-  const SUPPORTED_PROGRESS_VERSIONS = new Set([1, PROGRESS_SCHEMA_VERSION]);
+  const SUPPORTED_PROGRESS_VERSIONS = new Set([1, 2, PROGRESS_SCHEMA_VERSION]);
   const MAX_RUNG = 5;
   const RECENT_LIMIT = 32;
   const CUE_COOLDOWN = 12;
@@ -83,11 +86,12 @@
 
   function exportProgress(model) {
     const concepts = Object.fromEntries(Object.entries(model.concepts ?? {})
-      .filter(([, progress]) => progress.rung > 0 || progress.known ||
+      .filter(([, progress]) => progress.rung > 0 || progress.known || progress.heard ||
         progress.introduced || progress.tried)
       .map(([id, progress]) => [id, {
         rung: progress.rung,
         known: Boolean(progress.known),
+        heard: Boolean(progress.heard),
         introduced: Boolean(progress.introduced),
         tried: Boolean(progress.tried)
       }]));
@@ -110,7 +114,7 @@
     }
     // A version 1 rung records only that content was shown, so it seeds exposure. It is
     // never read as evidence the learner tried or understood anything.
-    const migrating = data.schemaVersion < PROGRESS_SCHEMA_VERSION;
+    const migratingV1 = data.schemaVersion === 1;
     const conceptIds = options.conceptIds ? new Set(options.conceptIds) : null;
     const ideaIds = options.ideaIds ? new Set(options.ideaIds) : null;
     const recipeIds = options.recipeIds ? new Set(options.recipeIds) : null;
@@ -123,8 +127,9 @@
         concepts[id] = {
           rung,
           known: progress.known === true,
-          introduced: migrating ? rung > 0 : progress.introduced === true,
-          tried: migrating ? false : progress.tried === true
+          heard: data.schemaVersion >= 3 && progress.heard === true,
+          introduced: migratingV1 ? rung > 0 : progress.introduced === true,
+          tried: migratingV1 ? false : progress.tried === true
         };
       }
     }
@@ -746,7 +751,7 @@
     const isRecommendedCable = patch => Boolean(patch?.from && patch?.to) && (
       ideas.some(idea => idea.cables.some(cable => sameCable(cable, patch))) ||
       recipes.some(recipe => recipe.steps.some(step => step.kind === 'cable' && sameCable(step.cable, patch)) ||
-        (recipe.buildOn ?? []).some(item => item.cables.some(cable => sameCable(cable, patch)))) ||
+        (recipe.buildOn ?? []).some(item => (item.cables ?? []).some(cable => sameCable(cable, patch)))) ||
       concepts.some(concept => Object.values(concept.ladder ?? {})
         .some(rungs => rungs.automate && sameCable(rungs.automate, patch)))
     );
@@ -790,13 +795,15 @@
       const status = recipeStatus(recipe, facts);
       const total = recipe.steps.length;
       if (status.nextIndex === -1) {
+        const listening = recipe.listeningPrompt ? ` Listen for ${recipe.listeningPrompt}` : '';
+        const recovery = recipe.recovery ? ` ${recipe.recovery}` : '';
         return {
           ...genericCue(action, {
             id: `recipe:${recipe.id}:done`,
             kind: 'recipe',
             priority: 88,
             title: `Rack patched: ${recipe.title}`,
-            body: `All ${total} steps are done. ${recipe.tryNext.map(next => next.text).join(' ')}`,
+            body: `All ${total} steps are done. ${recipe.tryNext.map(next => next.text).join(' ')}${listening}${recovery}`,
             rationale: recipe.rationale,
             confidence: recipe.confidence,
             targets: recipe.tryNext.map(targetForControl),
@@ -854,13 +861,17 @@
     const recipeCableSteps = recipe => recipe.steps.filter(step => step.kind === 'cable');
     const buildOnItems = recipe => recipe?.buildOn ?? [];
     const endpointLabel = endpoint => `${instrumentName(endpoint.instrumentId)} ${jackName(endpoint)}`;
+    const buildOnDone = (item, facts) => (item.cables ?? []).every(cable => facts.hasCable(cable)) &&
+      (item.settings ?? []).every(setting => recipeStepDone({ ...setting, kind: 'setting' }, facts));
 
     // A step is satisfied by its own cable, or by a fully patched build-on that replaces it
     // (for example DFAM clocked from SEQ 1 CLK instead of the MULT).
     function stepSatisfied(recipe, step, facts) {
-      return facts.hasCable(step.cable) || buildOnItems(recipe).some(item => (
-        (item.replaces ?? []).includes(step.id) && item.cables.every(cable => facts.hasCable(cable))
-      ));
+      return facts.hasCable(step.cable) || buildOnItems(recipe).some(item => {
+        if (!(item.replaces ?? []).includes(step.id)) return false;
+        const replacement = (item.cables ?? []).find(cable => sameEndpoint(cable.to, step.cable.to));
+        return Boolean(replacement && facts.hasCable(replacement));
+      });
     }
 
     function completePathways(facts) {
@@ -877,29 +888,39 @@
     function pathwayOwning(patch, facts) {
       return completePathways(facts).find(recipe => (
         recipeCableSteps(recipe).some(step => sameCable(step.cable, patch)) ||
-        buildOnItems(recipe).some(item => item.cables.some(cable => sameCable(cable, patch)))
+        buildOnItems(recipe).some(item => (item.cables ?? []).some(cable => sameCable(cable, patch)))
       )) ?? null;
     }
 
     function buildOnCue(action, recipe, item, facts, { alternateOnly }) {
-      const next = item.cables.find(cable => !facts.hasCable(cable));
-      if (!next) return null;
+      const next = (item.cables ?? []).find(cable => !facts.hasCable(cable));
+      const nextSetting = (item.settings ?? []).find(setting =>
+        !recipeStepDone({ ...setting, kind: 'setting' }, facts));
+      if (!next && !nextSetting) return null;
       const replaced = recipe.steps.filter(step => (item.replaces ?? []).includes(step.id)).map(step => step.cable);
-      if (conflictFor(next, facts, replaced)) return null;
+      if (next && conflictFor(next, facts, replaced)) return null;
+      const targets = next
+        ? [targetForEndpoint(next.from), targetForEndpoint(next.to)]
+        : [control(nextSetting.instrumentId, nextSetting.targetIds[0])];
+      const instruction = next ? item.text : (nextSetting.text ?? item.text);
+      const listening = item.listeningPrompt ? ` Listen for ${item.listeningPrompt}` : '';
+      const recovery = item.recovery ? ` ${item.recovery}` : '';
       return genericCue(action, {
         id: `buildon:${recipe.id}:${item.id}`,
         kind: 'suggestion',
         priority: 42,
         title: `Build on ${recipe.title}: ${item.title}`,
-        body: item.text,
+        body: `${instruction}${listening}${recovery}`,
         rationale: `This keeps your ${recipe.title} pathway working. ${item.result}`,
         confidence: item.confidence ?? 'general-synthesis',
         evidence: item.evidence ?? null,
-        targets: [targetForEndpoint(next.from), targetForEndpoint(next.to)],
-        panelMessage: `${jackName(next.from)} → ${jackName(next.to)}`,
+        targets,
+        panelMessage: next
+          ? `${jackName(next.from)} → ${jackName(next.to)}`
+          : (nextSetting.panel ?? item.title),
         proactive: alternateOnly,
         alternateOnly,
-        focus: { instrumentId: next.to.instrumentId },
+        focus: { instrumentId: next?.to.instrumentId ?? nextSetting.instrumentId },
         trace: [`${recipe.title} is patched on your rack`]
       });
     }
@@ -910,10 +931,14 @@
     }
 
     function builtOnCandidates(action, facts) {
-      if (!action.patch?.from) return [];
+      const touches = item => (
+        action.patch?.from && (item.cables ?? []).some(cable => sameCable(cable, action.patch))
+      ) || (
+        action.type === 'control-change' && (item.settings ?? []).some(setting =>
+          setting.instrumentId === action.instrumentId && setting.targetIds.includes(action.targetId))
+      );
       return completePathways(facts).flatMap(recipe => buildOnItems(recipe)
-        .filter(item => item.cables.some(cable => sameCable(cable, action.patch)) &&
-          item.cables.every(cable => facts.hasCable(cable)))
+        .filter(item => touches(item) && buildOnDone(item, facts))
         .map(item => genericCue(action, {
           id: `builton:${recipe.id}:${item.id}`,
           kind: 'completion',
@@ -923,7 +948,9 @@
           rationale: item.text,
           confidence: item.confidence ?? 'general-synthesis',
           evidence: item.evidence ?? null,
-          targets: [targetForEndpoint(action.patch.to)],
+          targets: action.patch?.to
+            ? [targetForEndpoint(action.patch.to)]
+            : [control(action.instrumentId, action.targetId)],
           panelMessage: item.title,
           trace: [`This cable builds on ${recipe.title}`]
         })));
@@ -939,9 +966,9 @@
           stepSatisfied(recipe, candidate, before) && !stepSatisfied(recipe, candidate, facts)
         ));
         const alternative = buildOnItems(recipe).find(item => (
-          (item.replaces ?? []).includes(step.id) && !item.cables.every(cable => facts.hasCable(cable))
+          (item.replaces ?? []).includes(step.id) && !buildOnDone(item, facts)
         ));
-        const alternativeCable = alternative?.cables.find(cable => !facts.hasCable(cable));
+        const alternativeCable = (alternative?.cables ?? []).find(cable => !facts.hasCable(cable));
         const restore = `Re-patch ${jackName(action.patch.from)} → ${jackName(action.patch.to)} to restore it.`;
         const offer = alternativeCable && !sameCable(alternativeCable, action.patch)
           ? ` Or build “${alternative.title}”: ${jackName(alternativeCable.from)} → ${jackName(alternativeCable.to)}.`
@@ -967,10 +994,15 @@
       return completePathways(facts).map(recipe => Object.freeze({
         id: recipe.id,
         title: recipe.title,
+        listeningPrompt: recipe.listeningPrompt ?? '',
+        recovery: recipe.recovery ?? '',
         buildOn: Object.freeze(buildOnItems(recipe).map(item => Object.freeze({
           id: item.id,
           title: item.title,
-          done: item.cables.every(cable => facts.hasCable(cable)),
+          result: item.result,
+          listeningPrompt: item.listeningPrompt ?? '',
+          recovery: item.recovery ?? '',
+          done: buildOnDone(item, facts),
           available: Boolean(buildOnCue({ type: 'summary' }, recipe, item, facts, { alternateOnly: false }))
         })))
       }));
@@ -987,7 +1019,7 @@
         for (const step of recipeCableSteps(active)) add(step.cable, `Step ${active.steps.indexOf(step) + 1} of ${active.title}.`);
       }
       for (const recipe of completePathways(facts)) {
-        for (const item of buildOnItems(recipe)) item.cables.forEach(cable => add(cable, `Builds on ${recipe.title}: ${item.title}.`));
+        for (const item of buildOnItems(recipe)) (item.cables ?? []).forEach(cable => add(cable, `Builds on ${recipe.title}: ${item.title}.`));
       }
       for (const idea of ideas) {
         if (!model.completedIdeaIds.includes(idea.id)) idea.cables.forEach(cable => add(cable, `Moog technique: ${idea.title}.`));
@@ -1732,7 +1764,13 @@
         if (!cue) return retain(model);
         let next = { ...model };
         const conceptId = cue.concept;
-        if (action.verdict === 'know' && conceptId) {
+        if (action.verdict === 'heard' && conceptId) {
+          const current = model.concepts[conceptId] ?? NO_PROGRESS;
+          next.concepts = {
+            ...model.concepts,
+            [conceptId]: { ...current, heard: true }
+          };
+        } else if (action.verdict === 'know' && conceptId) {
           const current = model.concepts[conceptId] ?? NO_PROGRESS;
           next.concepts = {
             ...model.concepts,
@@ -1746,6 +1784,59 @@
             ...model.conceptTouches,
             [conceptId]: { ...touches, sinceRung: Math.max(touches.sinceRung, GUIDANCE.teach.rungTouches) }
           };
+        } else if (action.verdict === 'no-difference') {
+          const facts = deriveRackFacts(rackState);
+          const target = cue.targets?.find(candidate => candidate.kind === 'control') ?? cue.targets?.[0];
+          const instrumentId = target?.instrumentId ?? cue.focus?.instrumentId;
+          const diagnosticAction = {
+            type: target?.kind === 'control' ? 'control-change' : 'cue-feedback',
+            instrumentId,
+            targetId: target?.kind === 'control' ? target.targetId : undefined
+          };
+          const diagnosis = diagnosisCandidates(diagnosticAction, facts, instrumentId)[0];
+          if (diagnosis) {
+            const response = {
+              ...diagnosis,
+              id: `feedback:no-difference:${diagnosis.id}`,
+              title: `No difference: ${diagnosis.title}`,
+              trace: [...(diagnosis.trace ?? []), 'You reported hearing no difference']
+            };
+            return result(Object.freeze(response), markShown({ ...next, activeCue: null }, response));
+          }
+          const targetName = target?.kind === 'control'
+            ? controlName(target.instrumentId, target.targetId)
+            : 'the highlighted control';
+          const response = genericCue(action, {
+            id: `feedback:no-difference:${cue.id}`,
+            kind: 'instruction',
+            priority: 70,
+            title: 'Make the contrast larger',
+            body: `The rack shows no clear setup blocker. Choose Keep this sound, move ${targetName} close to one extreme, listen, then move it close to the other. Undo or Return restores the starting sound.`,
+            rationale: 'A larger reversible contrast separates a subtle effect from a routing or setup problem without claiming the app measured what you heard.',
+            targets: target ? [target] : [],
+            panelMessage: `Compare both extremes of ${targetName}`,
+            focus: instrumentId ? { instrumentId } : null,
+            trace: ['Audio, routing, depth, transport, and source checks found no definite blocker']
+          });
+          return result(Object.freeze(response), markShown({ ...next, activeCue: null }, response));
+        } else if (action.verdict === 'explain') {
+          const target = cue.targets?.find(candidate => candidate.kind === 'control') ?? cue.targets?.[0];
+          const targetName = target?.kind === 'control'
+            ? controlName(target.instrumentId, target.targetId)
+            : 'the highlighted part of the patch';
+          const response = genericCue(action, {
+            id: `feedback:explain:${cue.id}`,
+            kind: 'instruction',
+            priority: 60,
+            title: `${cue.title}, another way`,
+            body: `Treat ${targetName} as a before-and-after comparison. Listen once with it near the starting position, make one clear move, then return it. Name only the change you can hear; there is no required answer.`,
+            rationale: cue.rationale || 'A single controlled comparison is easier to hear than several simultaneous changes.',
+            targets: target ? [target] : [],
+            panelMessage: `Compare ${targetName}`,
+            focus: target?.instrumentId ? { instrumentId: target.instrumentId } : null,
+            trace: ['You asked for another explanation of the current cue']
+          });
+          return result(Object.freeze(response), markShown({ ...next, activeCue: null }, response));
         }
         return result(null, { ...next, activeCue: null });
       }
@@ -1945,6 +2036,7 @@
         candidates.push(...ladderCandidates(action, model, lens, facts));
         candidates.push(...openEndCandidates(action, facts));
         candidates.push(...settingCandidates(action, facts));
+        candidates.push(...builtOnCandidates(action, facts));
         candidates.push(...balanceCandidates(action, model, facts));
         candidates.push(...diagnosisCandidates(action, facts, action.instrumentId));
         candidates.push(...proactiveCandidates(action, model, lens, facts));
@@ -2009,6 +2101,7 @@
       return Object.freeze({
         introduced: count(progress => progress.introduced || progress.rung > 0),
         tried: count(progress => progress.tried),
+        heard: count(progress => progress.heard),
         known: count(progress => progress.known),
         total: ids.length
       });

@@ -10402,6 +10402,80 @@ window.MOOG_APP_DATA = {
               "page": 26,
               "quote": "This output provides a copy of the control voltage used to modulate the VCF internally."
             }
+          },
+          {
+            "id": "transform-aggressive",
+            "title": "Transform gentle → aggressive",
+            "settings": [
+              {
+                "instrumentId": "dfam",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise DFAM resonance",
+                "text": "Raise DFAM RESONANCE above two-thirds."
+              },
+              {
+                "instrumentId": "mother32",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise Mother-32 resonance",
+                "text": "Raise Mother-32 RESONANCE above two-thirds."
+              },
+              {
+                "instrumentId": "subharmonicon",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise Sub resonance",
+                "text": "Raise Subharmonicon RESONANCE above two-thirds."
+              }
+            ],
+            "text": "Raise each filter resonance while keeping the existing cables in place.",
+            "result": "The same routing becomes sharper and more animated without rebuilding it.",
+            "listeningPrompt": "whether one resonant voice dominates; lower only that instrument if it does.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
+          },
+          {
+            "id": "transform-dense",
+            "title": "Transform sparse → dense",
+            "settings": [
+              {
+                "instrumentId": "dfam",
+                "targetIds": [
+                  "vca.vca-decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen DFAM VCA decay",
+                "text": "Lengthen DFAM VCA DECAY above two-thirds."
+              },
+              {
+                "instrumentId": "mother32",
+                "targetIds": [
+                  "eg.decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen Mother-32 decay",
+                "text": "Lengthen Mother-32 DECAY above two-thirds."
+              },
+              {
+                "instrumentId": "subharmonicon",
+                "targetIds": [
+                  "vca.vca-decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen Sub VCA decay",
+                "text": "Lengthen Subharmonicon VCA DECAY above two-thirds."
+              }
+            ],
+            "text": "Lengthen the three amplitude decays so notes overlap while the cable topology stays intact.",
+            "result": "The same notes and clocks fill more space and overlap into a denser texture.",
+            "listeningPrompt": "the point where overlap becomes a wash and the rhythm loses its edges.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
           }
         ],
         "tryNext": [
@@ -10415,7 +10489,9 @@ window.MOOG_APP_DATA = {
             "targetId": "rhythm.generator[0]",
             "text": "Change RHYTHM 1 to divide the shared clock differently on the Subharmonicon."
           }
-        ]
+        ],
+        "listeningPrompt": "whether all three step together and which voice reveals a missed pulse first.",
+        "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
       },
       {
         "id": "rack-clock-subharmonicon-polyrhythm",
@@ -10612,6 +10688,80 @@ window.MOOG_APP_DATA = {
               "page": 26,
               "quote": "This output provides a copy of the control voltage used to modulate the VCF internally."
             }
+          },
+          {
+            "id": "transform-aggressive",
+            "title": "Transform gentle → aggressive",
+            "settings": [
+              {
+                "instrumentId": "dfam",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise DFAM resonance",
+                "text": "Raise DFAM RESONANCE above two-thirds."
+              },
+              {
+                "instrumentId": "mother32",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise Mother-32 resonance",
+                "text": "Raise Mother-32 RESONANCE above two-thirds."
+              },
+              {
+                "instrumentId": "subharmonicon",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise Sub resonance",
+                "text": "Raise Subharmonicon RESONANCE above two-thirds."
+              }
+            ],
+            "text": "Raise each filter resonance while keeping the existing cables in place.",
+            "result": "The same routing becomes sharper and more animated without rebuilding it.",
+            "listeningPrompt": "whether one resonant voice dominates; lower only that instrument if it does.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
+          },
+          {
+            "id": "transform-dense",
+            "title": "Transform sparse → dense",
+            "settings": [
+              {
+                "instrumentId": "dfam",
+                "targetIds": [
+                  "vca.vca-decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen DFAM VCA decay",
+                "text": "Lengthen DFAM VCA DECAY above two-thirds."
+              },
+              {
+                "instrumentId": "mother32",
+                "targetIds": [
+                  "eg.decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen Mother-32 decay",
+                "text": "Lengthen Mother-32 DECAY above two-thirds."
+              },
+              {
+                "instrumentId": "subharmonicon",
+                "targetIds": [
+                  "vca.vca-decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen Sub VCA decay",
+                "text": "Lengthen Subharmonicon VCA DECAY above two-thirds."
+              }
+            ],
+            "text": "Lengthen the three amplitude decays so notes overlap while the cable topology stays intact.",
+            "result": "The same notes and clocks fill more space and overlap into a denser texture.",
+            "listeningPrompt": "the point where overlap becomes a wash and the rhythm loses its edges.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
           }
         ],
         "tryNext": [
@@ -10625,7 +10775,9 @@ window.MOOG_APP_DATA = {
             "targetId": "rhythm.generator[1]",
             "text": "Change RHYTHM 2 to shift Mother-32 against DFAM."
           }
-        ]
+        ],
+        "listeningPrompt": "whether all three step together and which voice reveals a missed pulse first.",
+        "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
       },
       {
         "id": "rack-shared-lfo",
@@ -10852,6 +11004,80 @@ window.MOOG_APP_DATA = {
             ],
             "text": "Patch Subharmonicon VCF EG into Mother-32 VCF CUTOFF, then lower Mother-32 CUTOFF.",
             "result": "Mother-32's filter now opens with every Subharmonicon step."
+          },
+          {
+            "id": "transform-aggressive",
+            "title": "Transform gentle → aggressive",
+            "settings": [
+              {
+                "instrumentId": "dfam",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise DFAM resonance",
+                "text": "Raise DFAM RESONANCE above two-thirds."
+              },
+              {
+                "instrumentId": "mother32",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise Mother-32 resonance",
+                "text": "Raise Mother-32 RESONANCE above two-thirds."
+              },
+              {
+                "instrumentId": "subharmonicon",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise Sub resonance",
+                "text": "Raise Subharmonicon RESONANCE above two-thirds."
+              }
+            ],
+            "text": "Raise each filter resonance while keeping the existing cables in place.",
+            "result": "The same routing becomes sharper and more animated without rebuilding it.",
+            "listeningPrompt": "whether one resonant voice dominates; lower only that instrument if it does.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
+          },
+          {
+            "id": "transform-dense",
+            "title": "Transform sparse → dense",
+            "settings": [
+              {
+                "instrumentId": "dfam",
+                "targetIds": [
+                  "vca.vca-decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen DFAM VCA decay",
+                "text": "Lengthen DFAM VCA DECAY above two-thirds."
+              },
+              {
+                "instrumentId": "mother32",
+                "targetIds": [
+                  "eg.decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen Mother-32 decay",
+                "text": "Lengthen Mother-32 DECAY above two-thirds."
+              },
+              {
+                "instrumentId": "subharmonicon",
+                "targetIds": [
+                  "vca.vca-decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen Sub VCA decay",
+                "text": "Lengthen Subharmonicon VCA DECAY above two-thirds."
+              }
+            ],
+            "text": "Lengthen the three amplitude decays so notes overlap while the cable topology stays intact.",
+            "result": "The same notes and clocks fill more space and overlap into a denser texture.",
+            "listeningPrompt": "the point where overlap becomes a wash and the rhythm loses its edges.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
           }
         ],
         "tryNext": [
@@ -10865,12 +11091,14 @@ window.MOOG_APP_DATA = {
             "targetId": "vcf.noise-vcf-mod",
             "text": "Adjust NOISE / VCF MOD to balance how much the drums move."
           }
-        ]
+        ],
+        "listeningPrompt": "the single modulation shape appearing on more than one voice.",
+        "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
       },
       {
         "id": "rack-drum-accents",
-        "title": "Drum hits shape the synths",
-        "summary": "DFAM leads the clock, and its envelopes open the Mother-32 and Subharmonicon filters on every hit.",
+        "title": "DFAM leads the rack",
+        "summary": "DFAM distributes its trigger clock to both melodic instruments, then its envelopes add linked accents.",
         "confidence": "general-synthesis",
         "rationale": "DFAM TRIGGER is a clock derived from its sequencer, and its VCF EG and VCO EG outputs copy its internal envelopes. Patched into the other two, every drum step clocks them and opens their filters.",
         "steps": [
@@ -11073,6 +11301,34 @@ window.MOOG_APP_DATA = {
         ],
         "buildOn": [
           {
+            "id": "transform-polyrhythm",
+            "title": "Transform synchronized → polyrhythmic",
+            "replaces": [
+              "mult-to-mother32-tempo"
+            ],
+            "cables": [
+              {
+                "from": {
+                  "instrumentId": "subharmonicon",
+                  "jackId": "seq-2-clock-out"
+                },
+                "to": {
+                  "instrumentId": "mother32",
+                  "jackId": "tempo-in"
+                }
+              }
+            ],
+            "text": "Keep DFAM clocking the Subharmonicon. Replace MULT 2 → Mother-32 TEMPO with Subharmonicon SEQ 2 CLK → Mother-32 TEMPO.",
+            "result": "DFAM remains master, while Mother-32 advances on a divided rhythm returned by the Subharmonicon.",
+            "listeningPrompt": "the slower alignment cycle between DFAM and Mother-32.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint.",
+            "evidence": {
+              "file": "Subharmonicon_Manual AMZ.pdf",
+              "page": 37,
+              "quote": "clock DFAM by using the Subharmonicon TRIGGER output, or the SEQ 1 CLK and SEQ 2 CLK outputs to clock DFAM with a polyrhythm."
+            }
+          },
+          {
             "id": "dfam-pitch-plays-mother32",
             "title": "DFAM pitch plays Mother-32",
             "cables": [
@@ -11130,6 +11386,80 @@ window.MOOG_APP_DATA = {
               "page": 27,
               "quote": "Plugging a control voltage into this jack replaces the Noise Generator"
             }
+          },
+          {
+            "id": "transform-aggressive",
+            "title": "Transform gentle → aggressive",
+            "settings": [
+              {
+                "instrumentId": "dfam",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise DFAM resonance",
+                "text": "Raise DFAM RESONANCE above two-thirds."
+              },
+              {
+                "instrumentId": "mother32",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise Mother-32 resonance",
+                "text": "Raise Mother-32 RESONANCE above two-thirds."
+              },
+              {
+                "instrumentId": "subharmonicon",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise Sub resonance",
+                "text": "Raise Subharmonicon RESONANCE above two-thirds."
+              }
+            ],
+            "text": "Raise each filter resonance while keeping the existing cables in place.",
+            "result": "The same routing becomes sharper and more animated without rebuilding it.",
+            "listeningPrompt": "whether one resonant voice dominates; lower only that instrument if it does.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
+          },
+          {
+            "id": "transform-dense",
+            "title": "Transform sparse → dense",
+            "settings": [
+              {
+                "instrumentId": "dfam",
+                "targetIds": [
+                  "vca.vca-decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen DFAM VCA decay",
+                "text": "Lengthen DFAM VCA DECAY above two-thirds."
+              },
+              {
+                "instrumentId": "mother32",
+                "targetIds": [
+                  "eg.decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen Mother-32 decay",
+                "text": "Lengthen Mother-32 DECAY above two-thirds."
+              },
+              {
+                "instrumentId": "subharmonicon",
+                "targetIds": [
+                  "vca.vca-decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen Sub VCA decay",
+                "text": "Lengthen Subharmonicon VCA DECAY above two-thirds."
+              }
+            ],
+            "text": "Lengthen the three amplitude decays so notes overlap while the cable topology stays intact.",
+            "result": "The same notes and clocks fill more space and overlap into a denser texture.",
+            "listeningPrompt": "the point where overlap becomes a wash and the rhythm loses its edges.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
           }
         ],
         "tryNext": [
@@ -11143,7 +11473,2684 @@ window.MOOG_APP_DATA = {
             "targetId": "vcf.vcf-decay",
             "text": "Lengthen DFAM VCF DECAY for longer swells on Mother-32."
           }
+        ],
+        "listeningPrompt": "the single modulation shape appearing on more than one voice.",
+        "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
+      },
+      {
+        "id": "rack-shared-melody",
+        "title": "One melody controls three voices",
+        "summary": "Mother-32 pitch is split to DFAM and both Subharmonicon oscillators while each instrument keeps its own rhythm and envelopes.",
+        "confidence": "spec-derived",
+        "rationale": "KB OUT carries Mother-32 pitch CV. The MULT copies that pitch to DFAM VCO 1 and Subharmonicon VCO 1; it does not share gates, clocks, or envelopes, so articulation stays independent.",
+        "listeningPrompt": "the same pitch contour spoken with three different attacks and rhythmic placements.",
+        "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint.",
+        "steps": [
+          {
+            "id": "kb-to-mult",
+            "kind": "cable",
+            "ifRemoved": "The shared pitch no longer reaches either follower.",
+            "cable": {
+              "from": {
+                "instrumentId": "mother32",
+                "jackId": "kb-out"
+              },
+              "to": {
+                "instrumentId": "mother32",
+                "jackId": "mult-in"
+              }
+            },
+            "panel": "KB OUT → MULT",
+            "text": "Patch Mother-32 KB OUT into MULT. This is pitch CV, so the MULT is copying one melody rather than mixing voices.",
+            "evidence": {
+              "file": "Mother_32_Users_Manual.pdf",
+              "page": 52,
+              "quote": "Do not use the Mult to mix two signals together. It is designed to be used ONLY as a CV signal splitter."
+            }
+          },
+          {
+            "id": "mult-to-dfam-pitch",
+            "kind": "cable",
+            "ifRemoved": "DFAM no longer follows the shared melody.",
+            "cable": {
+              "from": {
+                "instrumentId": "mother32",
+                "jackId": "mult-1-out"
+              },
+              "to": {
+                "instrumentId": "dfam",
+                "jackId": "vco-1-cv-in"
+              }
+            },
+            "panel": "MULT 1 → DFAM VCO 1 CV",
+            "text": "Patch MULT 1 into DFAM VCO 1 CV. DFAM keeps its own trigger rhythm and envelope."
+          },
+          {
+            "id": "mult-to-sub-pitch",
+            "kind": "cable",
+            "ifRemoved": "The Subharmonicon no longer follows the shared melody.",
+            "cable": {
+              "from": {
+                "instrumentId": "mother32",
+                "jackId": "mult-2-out"
+              },
+              "to": {
+                "instrumentId": "subharmonicon",
+                "jackId": "vco-1-in"
+              }
+            },
+            "panel": "MULT 2 → SUB VCO 1",
+            "text": "Patch MULT 2 into Subharmonicon VCO 1. Its internal normal carries that pitch to VCO 2 until VCO 2 IN is patched."
+          },
+          {
+            "id": "sub-rhythm",
+            "kind": "setting",
+            "instrumentId": "subharmonicon",
+            "targetIds": [
+              "rhythm.generator[0].assign.seq1",
+              "rhythm.generator[0].assign.seq2",
+              "rhythm.generator[1].assign.seq1",
+              "rhythm.generator[1].assign.seq2",
+              "rhythm.generator[2].assign.seq1",
+              "rhythm.generator[2].assign.seq2",
+              "rhythm.generator[3].assign.seq1",
+              "rhythm.generator[3].assign.seq2"
+            ],
+            "atLeast": 0.5,
+            "panel": "Assign a Sub rhythm",
+            "text": "Assign at least one rhythm generator to a Subharmonicon sequencer. A clock can arrive while an unassigned sequencer stays silent.",
+            "evidence": {
+              "file": "Subharmonicon_Manual AMZ.pdf",
+              "page": 25,
+              "quote": "In order for a sequencer to play, it must receive clock information from at least one of the rhythm generators."
+            }
+          },
+          {
+            "id": "sub-eg",
+            "kind": "setting",
+            "instrumentId": "subharmonicon",
+            "targetIds": [
+              "transport.eg"
+            ],
+            "atLeast": 0.25,
+            "panel": "Sub EG → ON",
+            "text": "Set Subharmonicon EG to ON so steps trigger its envelopes."
+          },
+          {
+            "id": "play-dfam",
+            "kind": "transport",
+            "instrumentId": "dfam",
+            "role": "independent",
+            "panel": "Start DFAM",
+            "text": "Start DFAM at its own tempo."
+          },
+          {
+            "id": "play-mother32",
+            "kind": "transport",
+            "instrumentId": "mother32",
+            "role": "independent",
+            "panel": "Start Mother-32",
+            "text": "Start Mother-32 so KB OUT carries its sequence pitch."
+          },
+          {
+            "id": "play-sub",
+            "kind": "transport",
+            "instrumentId": "subharmonicon",
+            "role": "independent",
+            "panel": "Start Subharmonicon",
+            "text": "Start Subharmonicon at its own tempo."
+          }
+        ],
+        "buildOn": [
+          {
+            "id": "sub-clocks-dfam",
+            "title": "Give DFAM a divided rhythm",
+            "cables": [
+              {
+                "from": {
+                  "instrumentId": "subharmonicon",
+                  "jackId": "seq-1-clock-out"
+                },
+                "to": {
+                  "instrumentId": "dfam",
+                  "jackId": "advance-clock-in"
+                }
+              }
+            ],
+            "text": "Keep the shared melody, then patch Subharmonicon SEQ 1 CLK into DFAM ADV / CLOCK.",
+            "result": "DFAM keeps the shared pitch but steps on a divided Subharmonicon rhythm.",
+            "listeningPrompt": "the common melody landing at different moments.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint.",
+            "evidence": {
+              "file": "Subharmonicon_Manual AMZ.pdf",
+              "page": 37,
+              "quote": "clock DFAM by using the Subharmonicon TRIGGER output, or the SEQ 1 CLK and SEQ 2 CLK outputs to clock DFAM with a polyrhythm."
+            }
+          },
+          {
+            "id": "sub-second-pitch",
+            "title": "Let Sub VCO 2 answer separately",
+            "cables": [
+              {
+                "from": {
+                  "instrumentId": "subharmonicon",
+                  "jackId": "seq-2-out"
+                },
+                "to": {
+                  "instrumentId": "subharmonicon",
+                  "jackId": "vco-2-in"
+                }
+              }
+            ],
+            "text": "Patch Subharmonicon SEQ 2 into VCO 2 IN. This breaks the internal VCO 1 pitch normal only for VCO 2.",
+            "result": "VCO 1 stays on the shared melody while VCO 2 becomes an answering line.",
+            "listeningPrompt": "the moment the doubled melody separates into call and response.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
+          },
+          {
+            "id": "transform-aggressive",
+            "title": "Transform gentle → aggressive",
+            "settings": [
+              {
+                "instrumentId": "dfam",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise DFAM resonance",
+                "text": "Raise DFAM RESONANCE above two-thirds."
+              },
+              {
+                "instrumentId": "mother32",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise Mother-32 resonance",
+                "text": "Raise Mother-32 RESONANCE above two-thirds."
+              },
+              {
+                "instrumentId": "subharmonicon",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise Sub resonance",
+                "text": "Raise Subharmonicon RESONANCE above two-thirds."
+              }
+            ],
+            "text": "Raise each filter resonance while keeping the existing cables in place.",
+            "result": "The same routing becomes sharper and more animated without rebuilding it.",
+            "listeningPrompt": "whether one resonant voice dominates; lower only that instrument if it does.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
+          },
+          {
+            "id": "transform-dense",
+            "title": "Transform sparse → dense",
+            "settings": [
+              {
+                "instrumentId": "dfam",
+                "targetIds": [
+                  "vca.vca-decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen DFAM VCA decay",
+                "text": "Lengthen DFAM VCA DECAY above two-thirds."
+              },
+              {
+                "instrumentId": "mother32",
+                "targetIds": [
+                  "eg.decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen Mother-32 decay",
+                "text": "Lengthen Mother-32 DECAY above two-thirds."
+              },
+              {
+                "instrumentId": "subharmonicon",
+                "targetIds": [
+                  "vca.vca-decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen Sub VCA decay",
+                "text": "Lengthen Subharmonicon VCA DECAY above two-thirds."
+              }
+            ],
+            "text": "Lengthen the three amplitude decays so notes overlap while the cable topology stays intact.",
+            "result": "The same notes and clocks fill more space and overlap into a denser texture.",
+            "listeningPrompt": "the point where overlap becomes a wash and the rhythm loses its edges.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
+          }
+        ],
+        "tryNext": [
+          {
+            "instrumentId": "mother32",
+            "targetId": "kb.glide",
+            "text": "Change Mother-32 GLIDE and hear all three pitched voices slide together."
+          },
+          {
+            "instrumentId": "dfam",
+            "targetId": "vco.vco-1-eg-amount",
+            "text": "Change DFAM VCO 1 EG AMOUNT to bend its copy of the melody without changing the source."
+          }
         ]
+      },
+      {
+        "id": "rack-audio-through-rack",
+        "title": "Audio through the rack",
+        "summary": "Subharmonicon audio enters Mother-32, then the combined Mother-32 output enters DFAM for a two-filter signal chain.",
+        "confidence": "spec-derived",
+        "rationale": "EXT AUDIO inputs let one instrument enter another instrument’s mixer and filter path. Mother-32 EXT AUDIO replaces its white-noise mixer source; DFAM EXT AUDIO replaces its white-noise generator.",
+        "listeningPrompt": "which filter changes the upstream instrument and which controls still affect only the host voice.",
+        "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint.",
+        "steps": [
+          {
+            "id": "sub-to-mother32-audio",
+            "kind": "cable",
+            "ifRemoved": "Subharmonicon audio no longer passes through Mother-32.",
+            "cable": {
+              "from": {
+                "instrumentId": "subharmonicon",
+                "jackId": "vca-out"
+              },
+              "to": {
+                "instrumentId": "mother32",
+                "jackId": "ext-audio-in"
+              }
+            },
+            "panel": "SUB VCA → M-32 EXT AUDIO",
+            "text": "Patch Subharmonicon VCA OUT into Mother-32 EXT AUDIO. This replaces Mother-32 white noise at the clockwise side of MIX."
+          },
+          {
+            "id": "mother32-external-mix",
+            "kind": "setting",
+            "instrumentId": "mother32",
+            "targetIds": [
+              "mixer.mix"
+            ],
+            "atLeast": 0.65,
+            "panel": "MIX toward EXT",
+            "text": "Turn Mother-32 MIX clockwise toward EXT AUDIO so the Subharmonicon is clearly present."
+          },
+          {
+            "id": "mother32-to-dfam-audio",
+            "kind": "cable",
+            "ifRemoved": "The Mother-32/Subharmonicon mix no longer passes through DFAM.",
+            "cable": {
+              "from": {
+                "instrumentId": "mother32",
+                "jackId": "vca-out"
+              },
+              "to": {
+                "instrumentId": "dfam",
+                "jackId": "ext-audio-in"
+              }
+            },
+            "panel": "M-32 VCA → DFAM EXT AUDIO",
+            "text": "Patch Mother-32 VCA OUT into DFAM EXT AUDIO. This replaces DFAM white noise; NOISE / EXT LEVEL now sets the incoming level."
+          },
+          {
+            "id": "dfam-external-level",
+            "kind": "setting",
+            "instrumentId": "dfam",
+            "targetIds": [
+              "mixer.noise-ext-level"
+            ],
+            "atLeast": 0.45,
+            "panel": "Raise EXT LEVEL",
+            "text": "Raise DFAM NOISE / EXT LEVEL so the incoming audio reaches its filter."
+          },
+          {
+            "id": "sub-rhythm",
+            "kind": "setting",
+            "instrumentId": "subharmonicon",
+            "targetIds": [
+              "rhythm.generator[0].assign.seq1",
+              "rhythm.generator[0].assign.seq2",
+              "rhythm.generator[1].assign.seq1",
+              "rhythm.generator[1].assign.seq2",
+              "rhythm.generator[2].assign.seq1",
+              "rhythm.generator[2].assign.seq2",
+              "rhythm.generator[3].assign.seq1",
+              "rhythm.generator[3].assign.seq2"
+            ],
+            "atLeast": 0.5,
+            "panel": "Assign a Sub rhythm",
+            "text": "Assign at least one rhythm generator to a Subharmonicon sequencer. A clock can arrive while an unassigned sequencer stays silent.",
+            "evidence": {
+              "file": "Subharmonicon_Manual AMZ.pdf",
+              "page": 25,
+              "quote": "In order for a sequencer to play, it must receive clock information from at least one of the rhythm generators."
+            }
+          },
+          {
+            "id": "sub-eg",
+            "kind": "setting",
+            "instrumentId": "subharmonicon",
+            "targetIds": [
+              "transport.eg"
+            ],
+            "atLeast": 0.25,
+            "panel": "Sub EG → ON",
+            "text": "Set Subharmonicon EG to ON so steps trigger its envelopes."
+          },
+          {
+            "id": "play-sub",
+            "kind": "transport",
+            "instrumentId": "subharmonicon",
+            "role": "independent",
+            "panel": "Start Subharmonicon",
+            "text": "Start Subharmonicon first so audio reaches Mother-32."
+          },
+          {
+            "id": "play-mother32",
+            "kind": "transport",
+            "instrumentId": "mother32",
+            "role": "independent",
+            "panel": "Start Mother-32",
+            "text": "Start Mother-32; its VCA output now carries its own voice plus external audio according to MIX."
+          },
+          {
+            "id": "play-dfam",
+            "kind": "transport",
+            "instrumentId": "dfam",
+            "role": "independent",
+            "panel": "Start DFAM",
+            "text": "Start DFAM so its envelopes animate the final filter and amplifier."
+          }
+        ],
+        "buildOn": [
+          {
+            "id": "dfam-envelope-on-mother32",
+            "title": "DFAM envelope opens the middle filter",
+            "cables": [
+              {
+                "from": {
+                  "instrumentId": "dfam",
+                  "jackId": "vcf-eg-out"
+                },
+                "to": {
+                  "instrumentId": "mother32",
+                  "jackId": "vcf-cutoff-in"
+                }
+              }
+            ],
+            "text": "Patch DFAM VCF EG into Mother-32 VCF CUTOFF and lower Mother-32 cutoff.",
+            "result": "DFAM hits now shape the middle filter in the audio chain.",
+            "listeningPrompt": "the whole upstream layer breathing with each DFAM hit.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint.",
+            "evidence": {
+              "file": "DFAM_Manual.pdf",
+              "page": 26,
+              "quote": "This output provides a copy of the control voltage used to modulate the VCF internally."
+            }
+          },
+          {
+            "id": "sub-envelope-on-dfam",
+            "title": "Sub envelope shapes the final amplifier",
+            "cables": [
+              {
+                "from": {
+                  "instrumentId": "subharmonicon",
+                  "jackId": "vca-eg-out"
+                },
+                "to": {
+                  "instrumentId": "dfam",
+                  "jackId": "vca-cv-in"
+                }
+              }
+            ],
+            "text": "Patch Subharmonicon VCA EG into DFAM VCA CV. The external CV sums with DFAM’s internal VCA envelope.",
+            "result": "Subharmonicon phrases now push the level of the complete chain.",
+            "listeningPrompt": "whether Subharmonicon accents lift the entire rack or drive DFAM too hard.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
+          },
+          {
+            "id": "transform-aggressive",
+            "title": "Transform gentle → aggressive",
+            "settings": [
+              {
+                "instrumentId": "dfam",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise DFAM resonance",
+                "text": "Raise DFAM RESONANCE above two-thirds."
+              },
+              {
+                "instrumentId": "mother32",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise Mother-32 resonance",
+                "text": "Raise Mother-32 RESONANCE above two-thirds."
+              },
+              {
+                "instrumentId": "subharmonicon",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise Sub resonance",
+                "text": "Raise Subharmonicon RESONANCE above two-thirds."
+              }
+            ],
+            "text": "Raise each filter resonance while keeping the existing cables in place.",
+            "result": "The same routing becomes sharper and more animated without rebuilding it.",
+            "listeningPrompt": "whether one resonant voice dominates; lower only that instrument if it does.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
+          },
+          {
+            "id": "transform-dense",
+            "title": "Transform sparse → dense",
+            "settings": [
+              {
+                "instrumentId": "dfam",
+                "targetIds": [
+                  "vca.vca-decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen DFAM VCA decay",
+                "text": "Lengthen DFAM VCA DECAY above two-thirds."
+              },
+              {
+                "instrumentId": "mother32",
+                "targetIds": [
+                  "eg.decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen Mother-32 decay",
+                "text": "Lengthen Mother-32 DECAY above two-thirds."
+              },
+              {
+                "instrumentId": "subharmonicon",
+                "targetIds": [
+                  "vca.vca-decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen Sub VCA decay",
+                "text": "Lengthen Subharmonicon VCA DECAY above two-thirds."
+              }
+            ],
+            "text": "Lengthen the three amplitude decays so notes overlap while the cable topology stays intact.",
+            "result": "The same notes and clocks fill more space and overlap into a denser texture.",
+            "listeningPrompt": "the point where overlap becomes a wash and the rhythm loses its edges.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
+          }
+        ],
+        "tryNext": [
+          {
+            "instrumentId": "mother32",
+            "targetId": "mixer.mix",
+            "text": "Sweep Mother-32 MIX to compare its oscillator with the external Subharmonicon source."
+          },
+          {
+            "instrumentId": "dfam",
+            "targetId": "vcf.cutoff",
+            "text": "Sweep DFAM CUTOFF to hear the final filter act on the complete chain."
+          }
+        ]
+      },
+      {
+        "id": "rack-envelope-conversation",
+        "title": "Three-envelope conversation",
+        "summary": "Each instrument sends an envelope to shape a different instrument, creating a three-way modulation loop.",
+        "confidence": "spec-derived",
+        "rationale": "Envelope outputs are control voltages. Sending each one to another voice’s cutoff or VCA makes articulation travel around the rack while each sound source remains local.",
+        "listeningPrompt": "which instrument starts each motion and which instrument supplies the sound that moves.",
+        "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint.",
+        "steps": [
+          {
+            "id": "dfam-to-mother32-envelope",
+            "kind": "cable",
+            "ifRemoved": "DFAM hits no longer open Mother-32’s filter.",
+            "cable": {
+              "from": {
+                "instrumentId": "dfam",
+                "jackId": "vcf-eg-out"
+              },
+              "to": {
+                "instrumentId": "mother32",
+                "jackId": "vcf-cutoff-in"
+              }
+            },
+            "panel": "DFAM VCF EG → M-32 CUTOFF",
+            "text": "Patch DFAM VCF EG into Mother-32 VCF CUTOFF.",
+            "evidence": {
+              "file": "DFAM_Manual.pdf",
+              "page": 26,
+              "quote": "This output provides a copy of the control voltage used to modulate the VCF internally."
+            }
+          },
+          {
+            "id": "mother32-cutoff-room",
+            "kind": "setting",
+            "instrumentId": "mother32",
+            "targetIds": [
+              "vcf.cutoff"
+            ],
+            "atMost": 0.55,
+            "panel": "Lower M-32 cutoff",
+            "text": "Lower Mother-32 CUTOFF so the incoming envelope has room to open it.",
+            "evidence": {
+              "file": "Mother_32_Users_Manual.pdf",
+              "page": 49,
+              "quote": "This input is summed with the Filter CUTOFF knob and the VCF Modulation signal."
+            }
+          },
+          {
+            "id": "mother32-to-sub-envelope",
+            "kind": "cable",
+            "ifRemoved": "Mother-32 notes no longer open the Subharmonicon filter.",
+            "cable": {
+              "from": {
+                "instrumentId": "mother32",
+                "jackId": "eg-out"
+              },
+              "to": {
+                "instrumentId": "subharmonicon",
+                "jackId": "cutoff-in"
+              }
+            },
+            "panel": "M-32 EG → SUB CUTOFF",
+            "text": "Patch Mother-32 EG OUT into Subharmonicon CUTOFF.",
+            "evidence": {
+              "file": "Subharmonicon_Manual AMZ.pdf",
+              "page": 33,
+              "quote": "With the CUTOFF knob centered, the signal received here can sweep the Cutoff Frequency through a range of up to ±5 octaves."
+            }
+          },
+          {
+            "id": "sub-cutoff-room",
+            "kind": "setting",
+            "instrumentId": "subharmonicon",
+            "targetIds": [
+              "vcf.cutoff"
+            ],
+            "atMost": 0.55,
+            "panel": "Lower SUB cutoff",
+            "text": "Lower Subharmonicon CUTOFF to leave room for Mother-32’s envelope."
+          },
+          {
+            "id": "sub-to-dfam-envelope",
+            "kind": "cable",
+            "ifRemoved": "The Subharmonicon envelope no longer shapes DFAM level.",
+            "cable": {
+              "from": {
+                "instrumentId": "subharmonicon",
+                "jackId": "vca-eg-out"
+              },
+              "to": {
+                "instrumentId": "dfam",
+                "jackId": "vca-cv-in"
+              }
+            },
+            "panel": "SUB VCA EG → DFAM VCA CV",
+            "text": "Patch Subharmonicon VCA EG into DFAM VCA CV. It sums with DFAM’s internal VCA envelope."
+          },
+          {
+            "id": "sub-rhythm",
+            "kind": "setting",
+            "instrumentId": "subharmonicon",
+            "targetIds": [
+              "rhythm.generator[0].assign.seq1",
+              "rhythm.generator[0].assign.seq2",
+              "rhythm.generator[1].assign.seq1",
+              "rhythm.generator[1].assign.seq2",
+              "rhythm.generator[2].assign.seq1",
+              "rhythm.generator[2].assign.seq2",
+              "rhythm.generator[3].assign.seq1",
+              "rhythm.generator[3].assign.seq2"
+            ],
+            "atLeast": 0.5,
+            "panel": "Assign a Sub rhythm",
+            "text": "Assign at least one rhythm generator to a Subharmonicon sequencer. A clock can arrive while an unassigned sequencer stays silent.",
+            "evidence": {
+              "file": "Subharmonicon_Manual AMZ.pdf",
+              "page": 25,
+              "quote": "In order for a sequencer to play, it must receive clock information from at least one of the rhythm generators."
+            }
+          },
+          {
+            "id": "sub-eg",
+            "kind": "setting",
+            "instrumentId": "subharmonicon",
+            "targetIds": [
+              "transport.eg"
+            ],
+            "atLeast": 0.25,
+            "panel": "Sub EG → ON",
+            "text": "Set Subharmonicon EG to ON so steps trigger its envelopes."
+          },
+          {
+            "id": "play-dfam",
+            "kind": "transport",
+            "instrumentId": "dfam",
+            "role": "independent",
+            "panel": "Start DFAM",
+            "text": "Start DFAM so its filter envelope speaks to Mother-32."
+          },
+          {
+            "id": "play-mother32",
+            "kind": "transport",
+            "instrumentId": "mother32",
+            "role": "independent",
+            "panel": "Start Mother-32",
+            "text": "Start Mother-32 so its envelope speaks to the Subharmonicon."
+          },
+          {
+            "id": "play-sub",
+            "kind": "transport",
+            "instrumentId": "subharmonicon",
+            "role": "independent",
+            "panel": "Start Subharmonicon",
+            "text": "Start Subharmonicon so its VCA envelope speaks to DFAM."
+          }
+        ],
+        "buildOn": [
+          {
+            "id": "sub-vcf-to-dfam-filter",
+            "title": "Move Sub’s message to DFAM filter",
+            "replaces": [
+              "sub-to-dfam-envelope"
+            ],
+            "cables": [
+              {
+                "from": {
+                  "instrumentId": "subharmonicon",
+                  "jackId": "vcf-eg-out"
+                },
+                "to": {
+                  "instrumentId": "dfam",
+                  "jackId": "vca-cv-in"
+                }
+              }
+            ],
+            "text": "Remove SUB VCA EG → DFAM VCA CV, then patch SUB VCF EG into the same destination.",
+            "result": "The conversation remains closed, but the Subharmonicon filter envelope now controls DFAM level.",
+            "listeningPrompt": "how the VCF envelope timing differs from the VCA envelope timing.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
+          },
+          {
+            "id": "dfam-vco-to-mother32",
+            "title": "Swap DFAM’s speaking envelope",
+            "replaces": [
+              "dfam-to-mother32-envelope"
+            ],
+            "cables": [
+              {
+                "from": {
+                  "instrumentId": "dfam",
+                  "jackId": "vco-eg-out"
+                },
+                "to": {
+                  "instrumentId": "mother32",
+                  "jackId": "vcf-cutoff-in"
+                }
+              }
+            ],
+            "text": "Replace DFAM VCF EG → Mother-32 CUTOFF with DFAM VCO EG → Mother-32 CUTOFF.",
+            "result": "Mother-32 now follows DFAM’s pitch-envelope timing instead of its filter-envelope timing.",
+            "listeningPrompt": "a shorter or longer filter gesture as DFAM VCO DECAY changes.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint.",
+            "evidence": {
+              "file": "DFAM_Manual.pdf",
+              "page": 27,
+              "quote": "This output provides a copy of the control voltage used to modulate the VCOs internally."
+            }
+          },
+          {
+            "id": "transform-aggressive",
+            "title": "Transform gentle → aggressive",
+            "settings": [
+              {
+                "instrumentId": "dfam",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise DFAM resonance",
+                "text": "Raise DFAM RESONANCE above two-thirds."
+              },
+              {
+                "instrumentId": "mother32",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise Mother-32 resonance",
+                "text": "Raise Mother-32 RESONANCE above two-thirds."
+              },
+              {
+                "instrumentId": "subharmonicon",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise Sub resonance",
+                "text": "Raise Subharmonicon RESONANCE above two-thirds."
+              }
+            ],
+            "text": "Raise each filter resonance while keeping the existing cables in place.",
+            "result": "The same routing becomes sharper and more animated without rebuilding it.",
+            "listeningPrompt": "whether one resonant voice dominates; lower only that instrument if it does.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
+          },
+          {
+            "id": "transform-dense",
+            "title": "Transform sparse → dense",
+            "settings": [
+              {
+                "instrumentId": "dfam",
+                "targetIds": [
+                  "vca.vca-decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen DFAM VCA decay",
+                "text": "Lengthen DFAM VCA DECAY above two-thirds."
+              },
+              {
+                "instrumentId": "mother32",
+                "targetIds": [
+                  "eg.decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen Mother-32 decay",
+                "text": "Lengthen Mother-32 DECAY above two-thirds."
+              },
+              {
+                "instrumentId": "subharmonicon",
+                "targetIds": [
+                  "vca.vca-decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen Sub VCA decay",
+                "text": "Lengthen Subharmonicon VCA DECAY above two-thirds."
+              }
+            ],
+            "text": "Lengthen the three amplitude decays so notes overlap while the cable topology stays intact.",
+            "result": "The same notes and clocks fill more space and overlap into a denser texture.",
+            "listeningPrompt": "the point where overlap becomes a wash and the rhythm loses its edges.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
+          }
+        ],
+        "tryNext": [
+          {
+            "instrumentId": "dfam",
+            "targetId": "vcf.vcf-decay",
+            "text": "Change DFAM VCF DECAY and identify the response on Mother-32."
+          },
+          {
+            "instrumentId": "mother32",
+            "targetId": "eg.decay",
+            "text": "Change Mother-32 DECAY and identify the response on Subharmonicon."
+          }
+        ]
+      },
+      {
+        "id": "rack-repair-silent-clock",
+        "title": "Repair a silent clock chain",
+        "summary": "Rebuild a Subharmonicon-led clock path, then verify transport, rhythm assignment, and envelopes in the order that silence usually hides them.",
+        "confidence": "general-synthesis",
+        "rationale": "A clock cable alone cannot make the rack audible: the followers must be armed, the Subharmonicon needs a rhythm assignment, and its EG must be on. Live checks skip every condition that is already correct.",
+        "listeningPrompt": "the first step where each formerly silent instrument joins the chain.",
+        "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint.",
+        "steps": [
+          {
+            "id": "sub-clock-to-mult",
+            "kind": "cable",
+            "ifRemoved": "Both follower branches lose their clock source.",
+            "cable": {
+              "from": {
+                "instrumentId": "subharmonicon",
+                "jackId": "clock-out"
+              },
+              "to": {
+                "instrumentId": "mother32",
+                "jackId": "mult-in"
+              }
+            },
+            "panel": "SUB CLOCK → MULT",
+            "text": "Patch Subharmonicon CLOCK OUT into Mother-32 MULT so one clock can reach both followers.",
+            "evidence": {
+              "file": "Mother_32_Users_Manual.pdf",
+              "page": 52,
+              "quote": "Do not use the Mult to mix two signals together. It is designed to be used ONLY as a CV signal splitter."
+            }
+          },
+          {
+            "id": "mult-to-dfam",
+            "kind": "cable",
+            "ifRemoved": "DFAM no longer receives the repaired clock.",
+            "cable": {
+              "from": {
+                "instrumentId": "mother32",
+                "jackId": "mult-1-out"
+              },
+              "to": {
+                "instrumentId": "dfam",
+                "jackId": "advance-clock-in"
+              }
+            },
+            "panel": "MULT 1 → DFAM ADV/CLOCK",
+            "text": "Patch MULT 1 into DFAM ADV / CLOCK.",
+            "evidence": {
+              "file": "DFAM_Manual.pdf",
+              "page": 29,
+              "quote": "This input allows the DFAM to be synchronized to an external clock source such as another DFAM or a Mother-32."
+            }
+          },
+          {
+            "id": "mult-to-mother32",
+            "kind": "cable",
+            "ifRemoved": "Mother-32 no longer receives the repaired clock.",
+            "cable": {
+              "from": {
+                "instrumentId": "mother32",
+                "jackId": "mult-2-out"
+              },
+              "to": {
+                "instrumentId": "mother32",
+                "jackId": "tempo-in"
+              }
+            },
+            "panel": "MULT 2 → M-32 TEMPO",
+            "text": "Patch MULT 2 into Mother-32 TEMPO.",
+            "evidence": {
+              "file": "Mother_32_Users_Manual.pdf",
+              "page": 56,
+              "quote": "The pattern is advanced one step for each rising edge detected."
+            }
+          },
+          {
+            "id": "sub-rhythm",
+            "kind": "setting",
+            "instrumentId": "subharmonicon",
+            "targetIds": [
+              "rhythm.generator[0].assign.seq1",
+              "rhythm.generator[0].assign.seq2",
+              "rhythm.generator[1].assign.seq1",
+              "rhythm.generator[1].assign.seq2",
+              "rhythm.generator[2].assign.seq1",
+              "rhythm.generator[2].assign.seq2",
+              "rhythm.generator[3].assign.seq1",
+              "rhythm.generator[3].assign.seq2"
+            ],
+            "atLeast": 0.5,
+            "panel": "Assign a Sub rhythm",
+            "text": "Assign at least one rhythm generator to a Subharmonicon sequencer. A clock can arrive while an unassigned sequencer stays silent.",
+            "evidence": {
+              "file": "Subharmonicon_Manual AMZ.pdf",
+              "page": 25,
+              "quote": "In order for a sequencer to play, it must receive clock information from at least one of the rhythm generators."
+            }
+          },
+          {
+            "id": "sub-eg",
+            "kind": "setting",
+            "instrumentId": "subharmonicon",
+            "targetIds": [
+              "transport.eg"
+            ],
+            "atLeast": 0.25,
+            "panel": "Sub EG → ON",
+            "text": "Set Subharmonicon EG to ON so steps trigger its envelopes."
+          },
+          {
+            "id": "arm-dfam",
+            "kind": "transport",
+            "instrumentId": "dfam",
+            "role": "follower",
+            "panel": "Arm DFAM",
+            "text": "Press DFAM RUN / STOP so it waits for clock."
+          },
+          {
+            "id": "arm-mother32",
+            "kind": "transport",
+            "instrumentId": "mother32",
+            "role": "follower",
+            "panel": "Arm Mother-32",
+            "text": "Press Mother-32 RUN/STOP so it waits for clock."
+          },
+          {
+            "id": "start-sub",
+            "kind": "transport",
+            "instrumentId": "subharmonicon",
+            "role": "leader",
+            "panel": "Start Sub last",
+            "text": "Press Subharmonicon PLAY last. Its CLOCK OUT now drives both followers.",
+            "evidence": {
+              "file": "Subharmonicon_Manual AMZ.pdf",
+              "page": 36,
+              "quote": "The clock signal is only present while the sequencer(s) are playing"
+            }
+          }
+        ],
+        "buildOn": [
+          {
+            "id": "split-polyrhythm",
+            "title": "Turn the repaired chain into a polyrhythm",
+            "replaces": [
+              "mult-to-dfam",
+              "mult-to-mother32"
+            ],
+            "cables": [
+              {
+                "from": {
+                  "instrumentId": "subharmonicon",
+                  "jackId": "seq-1-clock-out"
+                },
+                "to": {
+                  "instrumentId": "dfam",
+                  "jackId": "advance-clock-in"
+                }
+              },
+              {
+                "from": {
+                  "instrumentId": "subharmonicon",
+                  "jackId": "seq-2-clock-out"
+                },
+                "to": {
+                  "instrumentId": "mother32",
+                  "jackId": "tempo-in"
+                }
+              }
+            ],
+            "text": "Remove the two MULT follower cables. Patch SEQ 1 CLK → DFAM ADV / CLOCK and SEQ 2 CLK → Mother-32 TEMPO.",
+            "result": "The repaired followers now advance at two divisions of the same Subharmonicon master.",
+            "listeningPrompt": "the repeating point where the two follower patterns meet again.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint.",
+            "evidence": {
+              "file": "Subharmonicon_Manual AMZ.pdf",
+              "page": 37,
+              "quote": "clock DFAM by using the Subharmonicon TRIGGER output, or the SEQ 1 CLK and SEQ 2 CLK outputs to clock DFAM with a polyrhythm."
+            }
+          },
+          {
+            "id": "clock-dfam-with-trigger",
+            "title": "Use Sub trigger as DFAM’s clock",
+            "replaces": [
+              "mult-to-dfam"
+            ],
+            "cables": [
+              {
+                "from": {
+                  "instrumentId": "subharmonicon",
+                  "jackId": "trigger-out"
+                },
+                "to": {
+                  "instrumentId": "dfam",
+                  "jackId": "advance-clock-in"
+                }
+              }
+            ],
+            "text": "Replace MULT 1 → DFAM with Subharmonicon TRIGGER → DFAM ADV / CLOCK.",
+            "result": "DFAM advances on combined Subharmonicon rhythm triggers while Mother-32 stays on the master clock.",
+            "listeningPrompt": "DFAM accents following the combined rhythm pattern instead of every master pulse.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint.",
+            "evidence": {
+              "file": "Subharmonicon_Manual AMZ.pdf",
+              "page": 37,
+              "quote": "clock DFAM by using the Subharmonicon TRIGGER output, or the SEQ 1 CLK and SEQ 2 CLK outputs to clock DFAM with a polyrhythm."
+            }
+          },
+          {
+            "id": "transform-aggressive",
+            "title": "Transform gentle → aggressive",
+            "settings": [
+              {
+                "instrumentId": "dfam",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise DFAM resonance",
+                "text": "Raise DFAM RESONANCE above two-thirds."
+              },
+              {
+                "instrumentId": "mother32",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise Mother-32 resonance",
+                "text": "Raise Mother-32 RESONANCE above two-thirds."
+              },
+              {
+                "instrumentId": "subharmonicon",
+                "targetIds": [
+                  "vcf.resonance"
+                ],
+                "atLeast": 0.68,
+                "panel": "Raise Sub resonance",
+                "text": "Raise Subharmonicon RESONANCE above two-thirds."
+              }
+            ],
+            "text": "Raise each filter resonance while keeping the existing cables in place.",
+            "result": "The same routing becomes sharper and more animated without rebuilding it.",
+            "listeningPrompt": "whether one resonant voice dominates; lower only that instrument if it does.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
+          },
+          {
+            "id": "transform-dense",
+            "title": "Transform sparse → dense",
+            "settings": [
+              {
+                "instrumentId": "dfam",
+                "targetIds": [
+                  "vca.vca-decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen DFAM VCA decay",
+                "text": "Lengthen DFAM VCA DECAY above two-thirds."
+              },
+              {
+                "instrumentId": "mother32",
+                "targetIds": [
+                  "eg.decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen Mother-32 decay",
+                "text": "Lengthen Mother-32 DECAY above two-thirds."
+              },
+              {
+                "instrumentId": "subharmonicon",
+                "targetIds": [
+                  "vca.vca-decay"
+                ],
+                "atLeast": 0.65,
+                "panel": "Lengthen Sub VCA decay",
+                "text": "Lengthen Subharmonicon VCA DECAY above two-thirds."
+              }
+            ],
+            "text": "Lengthen the three amplitude decays so notes overlap while the cable topology stays intact.",
+            "result": "The same notes and clocks fill more space and overlap into a denser texture.",
+            "listeningPrompt": "the point where overlap becomes a wash and the rhythm loses its edges.",
+            "recovery": "Choose Keep this sound before a branch. Undo reverses one cable or setting; Return restores the checkpoint."
+          }
+        ],
+        "tryNext": [
+          {
+            "instrumentId": "subharmonicon",
+            "targetId": "rhythm.generator[0]",
+            "text": "Change the assigned rhythm divider and confirm that the sequencer is no longer silent."
+          },
+          {
+            "instrumentId": "mother32",
+            "targetId": "seq.tempo-gate-length",
+            "text": "Change Mother-32 TEMPO and notice that the external clock now owns its step rate."
+          }
+        ]
+      }
+    ]
+  },
+  "intentions": {
+    "schemaVersion": 1,
+    "summary": "Musical intentions and the bounded settings changes each one may propose. Authored from the panel behaviour described in the instrument specs; these are suggestions about this simulator, not measured claims about hardware.",
+    "boundaries": [
+      "Variations move continuous panel controls only. Cables, transport, patterns, and switch positions are never changed.",
+      "Output level controls are excluded, so a variation cannot quietly change how loud the rack is.",
+      "Every bound keeps modulation-depth controls above zero, so a variation cannot silently dismantle a routed modulation path.",
+      "Locks are settings locks. They hold the listed fields still; they do not promise identical perceived rhythm or pitch under every modulation patch."
+    ],
+    "locks": [
+      {
+        "id": "rhythm",
+        "label": "Lock rhythm",
+        "summary": "Holds tempo, clock division, rhythm routing, and the gate length that sets how long each step sounds.",
+        "fields": [
+          "dfam:seq.tempo",
+          "mother32:seq.tempo-gate-length",
+          "subharmonicon:rhythm.tempo",
+          "subharmonicon:rhythm.generator[0]",
+          "subharmonicon:rhythm.generator[1]",
+          "subharmonicon:rhythm.generator[2]",
+          "subharmonicon:rhythm.generator[3]",
+          "subharmonicon:rhythm.generator[0].assign.seq1",
+          "subharmonicon:rhythm.generator[0].assign.seq2",
+          "subharmonicon:rhythm.generator[1].assign.seq1",
+          "subharmonicon:rhythm.generator[1].assign.seq2",
+          "subharmonicon:rhythm.generator[2].assign.seq1",
+          "subharmonicon:rhythm.generator[2].assign.seq2",
+          "subharmonicon:rhythm.generator[3].assign.seq1",
+          "subharmonicon:rhythm.generator[3].assign.seq2"
+        ]
+      },
+      {
+        "id": "pitch",
+        "label": "Lock pitch",
+        "summary": "Holds tuning, glide, the pitch sequences, and the modulation depths that move pitch.",
+        "fields": [
+          "dfam:vco.vco-1-frequency",
+          "dfam:vco.vco-2-frequency",
+          "dfam:vco.vco-1-eg-amount",
+          "dfam:vco.vco-2-eg-amount",
+          "dfam:vco.vco1-to-vco2-fm-amount",
+          "dfam:vco.vco-decay",
+          "dfam:vco.hard-sync",
+          "dfam:vco.seq-pitch-mod",
+          "dfam:seq.pitch[0]",
+          "dfam:seq.pitch[1]",
+          "dfam:seq.pitch[2]",
+          "dfam:seq.pitch[3]",
+          "dfam:seq.pitch[4]",
+          "dfam:seq.pitch[5]",
+          "dfam:seq.pitch[6]",
+          "dfam:seq.pitch[7]",
+          "mother32:vco.frequency",
+          "mother32:vco.vco-mod-amount",
+          "mother32:vco.vco-mod-destination",
+          "mother32:kb.glide",
+          "subharmonicon:osc1.vco-1-freq",
+          "subharmonicon:osc2.vco-2-freq",
+          "subharmonicon:osc1.sub-1-freq-vco-1",
+          "subharmonicon:osc1.sub-2-freq-vco-1",
+          "subharmonicon:osc2.sub-1-freq-vco-2",
+          "subharmonicon:osc2.sub-2-freq-vco-2",
+          "subharmonicon:seq.seq1.step[0]",
+          "subharmonicon:seq.seq1.step[1]",
+          "subharmonicon:seq.seq1.step[2]",
+          "subharmonicon:seq.seq1.step[3]",
+          "subharmonicon:seq.seq2.step[0]",
+          "subharmonicon:seq.seq2.step[1]",
+          "subharmonicon:seq.seq2.step[2]",
+          "subharmonicon:seq.seq2.step[3]",
+          "subharmonicon:seq.seq-oct",
+          "subharmonicon:seq.quantize",
+          "subharmonicon:seq.seq1.assign.vco1",
+          "subharmonicon:seq.seq1.assign.sub1",
+          "subharmonicon:seq.seq1.assign.sub2",
+          "subharmonicon:seq.seq2.assign.vco2",
+          "subharmonicon:seq.seq2.assign.sub1",
+          "subharmonicon:seq.seq2.assign.sub2"
+        ]
+      }
+    ],
+    "intents": [
+      {
+        "id": "gentler",
+        "label": "Gentler",
+        "summary": "Softer onsets, less edge, darker tone. Nothing is rewired.",
+        "candidates": [
+          {
+            "id": "gentler-m32-soft-onset",
+            "title": "Ease the Mother-32 into each note",
+            "confidence": "authored",
+            "why": "ATTACK sets how long a note takes to reach full level. A longer attack starts the note softly instead of at full volume.",
+            "listenFor": "The start of each note: it should swell in rather than snap.",
+            "changes": [
+              {
+                "instrumentId": "mother32",
+                "controlId": "eg.attack",
+                "direction": "up",
+                "delta": {
+                  "min": 0.05,
+                  "max": 0.12
+                },
+                "bounds": {
+                  "min": 0,
+                  "max": 0.5
+                },
+                "requires": [
+                  {
+                    "kind": "value-at-most",
+                    "value": 0.4
+                  },
+                  {
+                    "kind": "value-at-most",
+                    "controlId": "eg.vca-mode",
+                    "value": 0.49
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "gentler-m32-less-edge",
+            "title": "Take the whistle off the Mother-32 filter",
+            "confidence": "authored",
+            "why": "RESONANCE emphasises the frequencies right at the cutoff. Less of it leaves the body of the sound without the ringing edge.",
+            "listenFor": "The thin ringing tone around the filter: it should recede while the note stays.",
+            "changes": [
+              {
+                "instrumentId": "mother32",
+                "controlId": "vcf.resonance",
+                "direction": "toward-center",
+                "center": 0.5,
+                "delta": {
+                  "min": 0.1,
+                  "max": 0.22
+                },
+                "bounds": {
+                  "min": 0,
+                  "max": 1
+                },
+                "requires": [
+                  {
+                    "kind": "value-at-least",
+                    "value": 0.2
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "gentler-dfam-softer-snap",
+            "title": "Soften the DFAM filter snap",
+            "confidence": "authored",
+            "why": "VCF EG AMOUNT is bipolar: its centre is no envelope movement. Moving it toward the centre reduces the filter throw without reversing it.",
+            "listenFor": "The attack of each drum: the filter sweep should soften while its direction stays the same.",
+            "changes": [
+              {
+                "instrumentId": "dfam",
+                "controlId": "vcf.vcf-eg-amount",
+                "direction": "toward-center",
+                "center": 0.5,
+                "delta": {
+                  "min": 0.1,
+                  "max": 0.2
+                },
+                "bounds": {
+                  "min": 0,
+                  "max": 1
+                },
+                "requires": [
+                  {
+                    "kind": "any-of",
+                    "requires": [
+                      {
+                        "kind": "value-at-most",
+                        "value": 0.38
+                      },
+                      {
+                        "kind": "value-at-least",
+                        "value": 0.62
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "gentler-dfam-darker",
+            "title": "Darken the DFAM",
+            "confidence": "authored",
+            "why": "Lowering CUTOFF removes upper harmonics before the sound reaches the output. The rhythm is unchanged; only the brightness is.",
+            "listenFor": "The top end: hits should lose their fizz and sit further back.",
+            "changes": [
+              {
+                "instrumentId": "dfam",
+                "controlId": "vcf.cutoff",
+                "direction": "down",
+                "delta": {
+                  "min": 0.08,
+                  "max": 0.18
+                },
+                "bounds": {
+                  "min": 0.18,
+                  "max": 1
+                },
+                "requires": [
+                  {
+                    "kind": "value-at-least",
+                    "value": 0.35
+                  },
+                  {
+                    "kind": "value-at-most",
+                    "controlId": "vcf.vcf-mode",
+                    "value": 0.49
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "gentler-dfam-less-noise",
+            "title": "Pull back the DFAM noise",
+            "confidence": "authored",
+            "why": "The NOISE / EXT level feeds the mixer alongside the oscillators. Less of it leaves more of the pitched tone and less hiss.",
+            "listenFor": "The hiss behind each hit: it should drop while the pitched part stays.",
+            "changes": [
+              {
+                "instrumentId": "dfam",
+                "controlId": "mixer.noise-ext-level",
+                "direction": "down",
+                "delta": {
+                  "min": 0.1,
+                  "max": 0.2
+                },
+                "bounds": {
+                  "min": 0.05,
+                  "max": 1
+                },
+                "requires": [
+                  {
+                    "kind": "value-at-least",
+                    "value": 0.25
+                  },
+                  {
+                    "kind": "no-cable-into",
+                    "instrumentId": "dfam",
+                    "jackId": "ext-audio-in"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "gentler-sub-swell",
+            "title": "Let the Subharmonicon swell",
+            "confidence": "authored",
+            "why": "Both Subharmonicon envelopes start at the attack knob. Opening the filter and the amplitude a little more slowly turns a plucked note into a soft one.",
+            "listenFor": "The first moment of each note: the tone should arrive after the note starts, not with it.",
+            "changes": [
+              {
+                "instrumentId": "subharmonicon",
+                "controlId": "vca.vca-attack",
+                "direction": "up",
+                "delta": {
+                  "min": 0.03,
+                  "max": 0.07
+                },
+                "bounds": {
+                  "min": 0,
+                  "max": 0.4
+                },
+                "requires": [
+                  {
+                    "kind": "value-at-most",
+                    "value": 0.33
+                  }
+                ]
+              },
+              {
+                "instrumentId": "subharmonicon",
+                "controlId": "vcf.vcf-attack",
+                "direction": "up",
+                "delta": {
+                  "min": 0.03,
+                  "max": 0.07
+                },
+                "bounds": {
+                  "min": 0,
+                  "max": 0.4
+                },
+                "requires": [
+                  {
+                    "kind": "value-at-most",
+                    "value": 0.33
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "more-movement",
+        "label": "More movement",
+        "summary": "More change over time from the modulation already on the panel. Nothing is rewired.",
+        "candidates": [
+          {
+            "id": "movement-m32-filter-sweep",
+            "title": "Let the Mother-32 filter move",
+            "confidence": "authored",
+            "why": "VCF MOD AMOUNT sets how far the selected mod source moves the cutoff. Raising it turns a fixed filter setting into a sweep.",
+            "listenFor": "The brightness over a few seconds: it should rise and fall instead of holding still.",
+            "changes": [
+              {
+                "instrumentId": "mother32",
+                "controlId": "vcf.vcf-mod-amount",
+                "direction": "up",
+                "delta": {
+                  "min": 0.12,
+                  "max": 0.25
+                },
+                "bounds": {
+                  "min": 0.08,
+                  "max": 0.8
+                },
+                "requires": [
+                  {
+                    "kind": "value-at-most",
+                    "value": 0.6
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "movement-m32-faster-lfo",
+            "title": "Speed up the Mother-32 LFO",
+            "confidence": "authored",
+            "why": "The LFO is only audible where it is routed. With mod amount already dialled in, a faster LFO makes that movement quicker rather than adding anything new.",
+            "listenFor": "The rate of the wobble you can already hear: it should tighten up.",
+            "changes": [
+              {
+                "instrumentId": "mother32",
+                "controlId": "lfo.lfo-rate",
+                "direction": "up",
+                "delta": {
+                  "min": 0.08,
+                  "max": 0.18
+                },
+                "bounds": {
+                  "min": 0.1,
+                  "max": 0.85
+                },
+                "requires": [
+                  {
+                    "kind": "value-at-most",
+                    "value": 0.7
+                  },
+                  {
+                    "kind": "any-of",
+                    "requires": [
+                      {
+                        "kind": "all-of",
+                        "requires": [
+                          {
+                            "kind": "value-at-most",
+                            "controlId": "vcf.vcf-mod-source",
+                            "value": 0.49
+                          },
+                          {
+                            "kind": "value-at-least",
+                            "controlId": "vcf.vcf-mod-amount",
+                            "value": 0.08
+                          }
+                        ]
+                      },
+                      {
+                        "kind": "all-of",
+                        "requires": [
+                          {
+                            "kind": "value-at-most",
+                            "controlId": "vco.vco-mod-source",
+                            "value": 0.49
+                          },
+                          {
+                            "kind": "value-at-least",
+                            "controlId": "vco.vco-mod-amount",
+                            "value": 0.08
+                          }
+                        ]
+                      },
+                      {
+                        "kind": "cable",
+                        "from": {
+                          "instrumentId": "mother32",
+                          "jackId": "lfo-triangle-out"
+                        },
+                        "to": {
+                          "instrumentId": "mother32",
+                          "jackId": "vcf-cutoff-in"
+                        },
+                        "because": "LFO TRI is patched to the Mother-32 cutoff",
+                        "missing": "LFO TRI is not patched to the Mother-32 cutoff"
+                      },
+                      {
+                        "kind": "cable",
+                        "from": {
+                          "instrumentId": "mother32",
+                          "jackId": "lfo-square-out"
+                        },
+                        "to": {
+                          "instrumentId": "mother32",
+                          "jackId": "vcf-cutoff-in"
+                        },
+                        "because": "LFO SQ is patched to the Mother-32 cutoff",
+                        "missing": "LFO SQ is not patched to the Mother-32 cutoff"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "movement-dfam-filter-envelope",
+            "title": "Open the DFAM filter envelope",
+            "confidence": "authored",
+            "why": "VCF EG AMOUNT is bipolar. Moving it farther from the centre increases the filter sweep while preserving its current direction.",
+            "listenFor": "Each hit separately: the brightness should fall away during the note.",
+            "changes": [
+              {
+                "instrumentId": "dfam",
+                "controlId": "vcf.vcf-eg-amount",
+                "direction": "away-from-center",
+                "center": 0.5,
+                "delta": {
+                  "min": 0.1,
+                  "max": 0.22
+                },
+                "bounds": {
+                  "min": 0,
+                  "max": 1
+                },
+                "requires": []
+              }
+            ]
+          },
+          {
+            "id": "movement-dfam-noise-into-filter",
+            "title": "Let noise shake the DFAM filter",
+            "confidence": "authored",
+            "why": "NOISE / VCF MOD sends the noise source at the filter instead of the mixer, so the cutoff jitters rather than holding a fixed value.",
+            "listenFor": "The edge of each hit: it should become grainy and less repeatable between hits.",
+            "changes": [
+              {
+                "instrumentId": "dfam",
+                "controlId": "vcf.noise-vcf-mod",
+                "direction": "up",
+                "delta": {
+                  "min": 0.08,
+                  "max": 0.18
+                },
+                "bounds": {
+                  "min": 0.08,
+                  "max": 0.85
+                },
+                "requires": [
+                  {
+                    "kind": "value-at-most",
+                    "value": 0.6
+                  },
+                  {
+                    "kind": "no-cable-into",
+                    "instrumentId": "dfam",
+                    "jackId": "vcf-mod-in"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "movement-sub-filter-envelope",
+            "title": "Open the Subharmonicon filter envelope",
+            "confidence": "authored",
+            "why": "VCF EG AMT is bipolar. Moving it farther from the centre increases each step's filter sweep while preserving its current direction.",
+            "listenFor": "Across a few steps: each note should open and close rather than repeating identically.",
+            "changes": [
+              {
+                "instrumentId": "subharmonicon",
+                "controlId": "vcf.vcf-eg-amt",
+                "direction": "away-from-center",
+                "center": 0.5,
+                "delta": {
+                  "min": 0.1,
+                  "max": 0.22
+                },
+                "bounds": {
+                  "min": 0,
+                  "max": 1
+                },
+                "requires": []
+              }
+            ]
+          },
+          {
+            "id": "movement-dfam-fm",
+            "title": "Add DFAM oscillator FM",
+            "confidence": "authored",
+            "why": "1>2 FM AMOUNT lets VCO 1 modulate VCO 2, which changes the harmonic content of VCO 2 rather than its level. This moves pitch, so Lock pitch holds it.",
+            "listenFor": "The character of the lower oscillator: it should grow metallic rather than louder.",
+            "changes": [
+              {
+                "instrumentId": "dfam",
+                "controlId": "vco.vco1-to-vco2-fm-amount",
+                "direction": "up",
+                "delta": {
+                  "min": 0.08,
+                  "max": 0.16
+                },
+                "bounds": {
+                  "min": 0.05,
+                  "max": 0.7
+                },
+                "requires": [
+                  {
+                    "kind": "value-at-most",
+                    "value": 0.6
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "movement-m32-pitch-wobble",
+            "title": "Wobble the Mother-32 pitch",
+            "confidence": "authored",
+            "why": "With LFO selected as the source and FREQ as the destination, VCO MOD AMOUNT sets the depth of pitch movement. Lock pitch holds it.",
+            "listenFor": "The note should waver in pitch at the LFO rate rather than only changing texture.",
+            "changes": [
+              {
+                "instrumentId": "mother32",
+                "controlId": "vco.vco-mod-amount",
+                "direction": "up",
+                "delta": {
+                  "min": 0.08,
+                  "max": 0.16
+                },
+                "bounds": {
+                  "min": 0.05,
+                  "max": 0.6
+                },
+                "requires": [
+                  {
+                    "kind": "value-at-most",
+                    "value": 0.5
+                  },
+                  {
+                    "kind": "value-at-most",
+                    "controlId": "vco.vco-mod-source",
+                    "value": 0.49
+                  },
+                  {
+                    "kind": "value-at-least",
+                    "controlId": "vco.vco-mod-destination",
+                    "value": 0.5
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "tighter-rhythm",
+        "label": "Tighter rhythm",
+        "summary": "Shorter notes and faster onsets, so the pulse reads more clearly. Tempo itself is not changed.",
+        "candidates": [
+          {
+            "id": "tighter-dfam-short-tails",
+            "title": "Shorten the DFAM tails",
+            "confidence": "authored",
+            "why": "VCA DECAY sets how long a hit rings and VCF DECAY how long it stays bright. Shortening both leaves space between hits.",
+            "listenFor": "The gap between hits: it should open up, and the pattern should read as separate strikes.",
+            "changes": [
+              {
+                "instrumentId": "dfam",
+                "controlId": "vca.vca-decay",
+                "direction": "down",
+                "delta": {
+                  "min": 0.1,
+                  "max": 0.22
+                },
+                "bounds": {
+                  "min": 0.08,
+                  "max": 1
+                },
+                "requires": [
+                  {
+                    "kind": "value-at-least",
+                    "value": 0.28
+                  }
+                ]
+              },
+              {
+                "instrumentId": "dfam",
+                "controlId": "vcf.vcf-decay",
+                "direction": "down",
+                "delta": {
+                  "min": 0.1,
+                  "max": 0.22
+                },
+                "bounds": {
+                  "min": 0.08,
+                  "max": 1
+                },
+                "requires": [
+                  {
+                    "kind": "value-at-least",
+                    "value": 0.28
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "tighter-m32-shorter-notes",
+            "title": "Shorten the Mother-32 notes",
+            "confidence": "authored",
+            "why": "DECAY sets how long a note falls away after its attack. A shorter decay ends each note sooner without touching the clock.",
+            "listenFor": "The end of each note: it should stop before the next one starts.",
+            "changes": [
+              {
+                "instrumentId": "mother32",
+                "controlId": "eg.decay",
+                "direction": "down",
+                "delta": {
+                  "min": 0.1,
+                  "max": 0.22
+                },
+                "bounds": {
+                  "min": 0.08,
+                  "max": 1
+                },
+                "requires": [
+                  {
+                    "kind": "value-at-least",
+                    "value": 0.28
+                  },
+                  {
+                    "kind": "value-at-most",
+                    "controlId": "eg.vca-mode",
+                    "value": 0.49
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "tighter-m32-immediate-onset",
+            "title": "Make the Mother-32 speak immediately",
+            "confidence": "authored",
+            "why": "A slow attack delays the moment a note becomes audible, which blurs where the beat is. A shorter one puts the note back on the step.",
+            "listenFor": "Where each note lands against the pulse: it should arrive on the step, not after it.",
+            "changes": [
+              {
+                "instrumentId": "mother32",
+                "controlId": "eg.attack",
+                "direction": "down",
+                "delta": {
+                  "min": 0.08,
+                  "max": 0.2
+                },
+                "bounds": {
+                  "min": 0,
+                  "max": 1
+                },
+                "requires": [
+                  {
+                    "kind": "value-at-least",
+                    "value": 0.1
+                  },
+                  {
+                    "kind": "value-at-most",
+                    "controlId": "eg.vca-mode",
+                    "value": 0.49
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "tighter-sub-short-envelopes",
+            "title": "Shorten the Subharmonicon envelopes",
+            "confidence": "authored",
+            "why": "Shorter VCA and VCF decays end each step before the next one arrives, which is what makes a subharmonic sequence sound rhythmic rather than washed.",
+            "listenFor": "Whether steps overlap: they should separate into distinct notes.",
+            "changes": [
+              {
+                "instrumentId": "subharmonicon",
+                "controlId": "vca.vca-decay",
+                "direction": "down",
+                "delta": {
+                  "min": 0.1,
+                  "max": 0.22
+                },
+                "bounds": {
+                  "min": 0.08,
+                  "max": 1
+                },
+                "requires": [
+                  {
+                    "kind": "value-at-least",
+                    "value": 0.28
+                  }
+                ]
+              },
+              {
+                "instrumentId": "subharmonicon",
+                "controlId": "vcf.vcf-decay",
+                "direction": "down",
+                "delta": {
+                  "min": 0.1,
+                  "max": 0.22
+                },
+                "bounds": {
+                  "min": 0.08,
+                  "max": 1
+                },
+                "requires": [
+                  {
+                    "kind": "value-at-least",
+                    "value": 0.28
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "tighter-dfam-pitch-blip",
+            "title": "Shorten the DFAM pitch sweep",
+            "confidence": "authored",
+            "why": "VCO DECAY sets how long the pitch envelope falls, so a shorter one turns a descending tone into a blip. That is a pitch setting, so Lock pitch holds it.",
+            "listenFor": "The downward slide at the start of each hit: it should become a click.",
+            "changes": [
+              {
+                "instrumentId": "dfam",
+                "controlId": "vco.vco-decay",
+                "direction": "down",
+                "delta": {
+                  "min": 0.1,
+                  "max": 0.2
+                },
+                "bounds": {
+                  "min": 0.08,
+                  "max": 1
+                },
+                "requires": [
+                  {
+                    "kind": "value-at-least",
+                    "value": 0.3
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "surprise",
+        "label": "Surprise me",
+        "summary": "One small nudge to one setting, drawn from a seeded list. Transport, cables, and output levels are never included.",
+        "seeded": true,
+        "candidates": [
+          {
+            "id": "surprise-m32-cutoff",
+            "title": "Nudge the Mother-32 cutoff",
+            "confidence": "exploratory",
+            "why": "Cutoff decides which harmonics survive the filter, so a small move changes the colour without changing the notes.",
+            "listenFor": "Brightness only: the pitch and rhythm should be exactly as they were.",
+            "changes": [
+              {
+                "instrumentId": "mother32",
+                "controlId": "vcf.cutoff",
+                "direction": "either",
+                "delta": {
+                  "min": 0.05,
+                  "max": 0.12
+                },
+                "bounds": {
+                  "min": 0.15,
+                  "max": 0.9
+                }
+              }
+            ]
+          },
+          {
+            "id": "surprise-m32-resonance",
+            "title": "Nudge the Mother-32 resonance",
+            "confidence": "exploratory",
+            "why": "Resonance lifts the frequencies at the cutoff, which is the difference between a filter that colours and one that sings.",
+            "listenFor": "A tone forming around the cutoff, or receding if the nudge went down.",
+            "changes": [
+              {
+                "instrumentId": "mother32",
+                "controlId": "vcf.resonance",
+                "direction": "either",
+                "delta": {
+                  "min": 0.05,
+                  "max": 0.12
+                },
+                "bounds": {
+                  "min": 0,
+                  "max": 0.8
+                }
+              }
+            ]
+          },
+          {
+            "id": "surprise-m32-decay",
+            "title": "Nudge the Mother-32 decay",
+            "confidence": "exploratory",
+            "why": "Decay sets how long a note falls away, which changes how connected the line feels without moving the clock.",
+            "listenFor": "Whether notes run into each other or separate.",
+            "changes": [
+              {
+                "instrumentId": "mother32",
+                "controlId": "eg.decay",
+                "direction": "either",
+                "delta": {
+                  "min": 0.05,
+                  "max": 0.12
+                },
+                "bounds": {
+                  "min": 0.1,
+                  "max": 0.9
+                }
+              }
+            ]
+          },
+          {
+            "id": "surprise-m32-mix",
+            "title": "Nudge the Mother-32 mix",
+            "confidence": "exploratory",
+            "why": "MIX balances the oscillator against the noise or external source at the main mixer.",
+            "listenFor": "How much hiss or external sound sits behind the oscillator.",
+            "changes": [
+              {
+                "instrumentId": "mother32",
+                "controlId": "mixer.mix",
+                "direction": "either",
+                "delta": {
+                  "min": 0.05,
+                  "max": 0.12
+                },
+                "bounds": {
+                  "min": 0.05,
+                  "max": 0.95
+                }
+              }
+            ]
+          },
+          {
+            "id": "surprise-m32-lfo-rate",
+            "title": "Nudge the Mother-32 LFO rate",
+            "confidence": "exploratory",
+            "why": "The LFO rate only matters where the LFO is routed, so this may do nothing until some mod amount is dialled in.",
+            "listenFor": "The speed of any wobble already present.",
+            "changes": [
+              {
+                "instrumentId": "mother32",
+                "controlId": "lfo.lfo-rate",
+                "direction": "either",
+                "delta": {
+                  "min": 0.05,
+                  "max": 0.12
+                },
+                "bounds": {
+                  "min": 0.1,
+                  "max": 0.9
+                }
+              }
+            ]
+          },
+          {
+            "id": "surprise-dfam-cutoff",
+            "title": "Nudge the DFAM cutoff",
+            "confidence": "exploratory",
+            "why": "The DFAM filter sets how much of each hit's upper harmonics reach the output.",
+            "listenFor": "How bright the hits are, with the pattern unchanged.",
+            "changes": [
+              {
+                "instrumentId": "dfam",
+                "controlId": "vcf.cutoff",
+                "direction": "either",
+                "delta": {
+                  "min": 0.05,
+                  "max": 0.12
+                },
+                "bounds": {
+                  "min": 0.15,
+                  "max": 0.9
+                }
+              }
+            ]
+          },
+          {
+            "id": "surprise-dfam-resonance",
+            "title": "Nudge the DFAM resonance",
+            "confidence": "exploratory",
+            "why": "Resonance gives the DFAM filter a voice of its own around the cutoff, which reads as pitch in a percussive hit.",
+            "listenFor": "A pitched ring on the hits.",
+            "changes": [
+              {
+                "instrumentId": "dfam",
+                "controlId": "vcf.resonance",
+                "direction": "either",
+                "delta": {
+                  "min": 0.05,
+                  "max": 0.12
+                },
+                "bounds": {
+                  "min": 0,
+                  "max": 0.8
+                }
+              }
+            ]
+          },
+          {
+            "id": "surprise-dfam-vcf-eg",
+            "title": "Nudge the DFAM filter envelope amount",
+            "confidence": "exploratory",
+            "why": "This sets how much of the envelope reaches the filter, which is most of what makes a hit sound struck.",
+            "listenFor": "The sweep inside each hit.",
+            "changes": [
+              {
+                "instrumentId": "dfam",
+                "controlId": "vcf.vcf-eg-amount",
+                "direction": "either",
+                "delta": {
+                  "min": 0.05,
+                  "max": 0.12
+                },
+                "bounds": {
+                  "min": 0.12,
+                  "max": 0.9
+                }
+              }
+            ]
+          },
+          {
+            "id": "surprise-dfam-noise-vcf-mod",
+            "title": "Nudge the DFAM noise-to-filter amount",
+            "confidence": "exploratory",
+            "why": "Noise aimed at the filter makes the cutoff jitter, so hits stop being identical to each other.",
+            "listenFor": "Grain and variation between repeated hits.",
+            "changes": [
+              {
+                "instrumentId": "dfam",
+                "controlId": "vcf.noise-vcf-mod",
+                "direction": "either",
+                "delta": {
+                  "min": 0.05,
+                  "max": 0.12
+                },
+                "bounds": {
+                  "min": 0.05,
+                  "max": 0.9
+                }
+              }
+            ]
+          },
+          {
+            "id": "surprise-dfam-noise-level",
+            "title": "Nudge the DFAM noise level",
+            "confidence": "exploratory",
+            "why": "The noise and external input share a level control into the mixer, so this balances hiss against the oscillators.",
+            "listenFor": "How much hiss sits behind the pitched part.",
+            "changes": [
+              {
+                "instrumentId": "dfam",
+                "controlId": "mixer.noise-ext-level",
+                "direction": "either",
+                "delta": {
+                  "min": 0.05,
+                  "max": 0.12
+                },
+                "bounds": {
+                  "min": 0.05,
+                  "max": 0.9
+                }
+              }
+            ]
+          },
+          {
+            "id": "surprise-sub-cutoff",
+            "title": "Nudge the Subharmonicon cutoff",
+            "confidence": "exploratory",
+            "why": "The filter decides how much of the subharmonic stack survives, which changes how thick the chord sounds.",
+            "listenFor": "How much low detail you can still hear under the top note.",
+            "changes": [
+              {
+                "instrumentId": "subharmonicon",
+                "controlId": "vcf.cutoff",
+                "direction": "either",
+                "delta": {
+                  "min": 0.05,
+                  "max": 0.12
+                },
+                "bounds": {
+                  "min": 0.15,
+                  "max": 0.9
+                }
+              }
+            ]
+          },
+          {
+            "id": "surprise-sub-resonance",
+            "title": "Nudge the Subharmonicon resonance",
+            "confidence": "exploratory",
+            "why": "Resonance emphasises the cutoff region, which can pick one subharmonic out of the stack.",
+            "listenFor": "One partial standing out from the others.",
+            "changes": [
+              {
+                "instrumentId": "subharmonicon",
+                "controlId": "vcf.resonance",
+                "direction": "either",
+                "delta": {
+                  "min": 0.05,
+                  "max": 0.12
+                },
+                "bounds": {
+                  "min": 0,
+                  "max": 0.8
+                }
+              }
+            ]
+          },
+          {
+            "id": "surprise-sub-vca-decay",
+            "title": "Nudge the Subharmonicon amplitude decay",
+            "confidence": "exploratory",
+            "why": "Decay sets how long each step sounds, which decides whether the sequence separates into notes or blurs into a drone.",
+            "listenFor": "Whether steps overlap.",
+            "changes": [
+              {
+                "instrumentId": "subharmonicon",
+                "controlId": "vca.vca-decay",
+                "direction": "either",
+                "delta": {
+                  "min": 0.05,
+                  "max": 0.12
+                },
+                "bounds": {
+                  "min": 0.1,
+                  "max": 0.9
+                }
+              }
+            ]
+          },
+          {
+            "id": "surprise-sub-vcf-eg-amt",
+            "title": "Nudge the Subharmonicon filter envelope amount",
+            "confidence": "exploratory",
+            "why": "This decides how far the envelope moves the cutoff on each step, which is what makes a repeating pattern breathe.",
+            "listenFor": "Movement inside each step rather than between steps.",
+            "changes": [
+              {
+                "instrumentId": "subharmonicon",
+                "controlId": "vcf.vcf-eg-amt",
+                "direction": "either",
+                "delta": {
+                  "min": 0.05,
+                  "max": 0.12
+                },
+                "bounds": {
+                  "min": 0.1,
+                  "max": 0.9
+                }
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "experiments": {
+    "schemaVersion": 1,
+    "summary": "Short, reversible listening tasks. Expected results are hypotheses for this provisional simulator, not measurements of Moog hardware or judgments about the player's description.",
+    "experiments": [
+      {
+        "id": "dfam-filter-envelope-depth",
+        "title": "Hear the DFAM filter envelope",
+        "instrumentId": "dfam",
+        "summary": "Compare the current sound with a clearly different VCF EG AMOUNT while every other saved setting stays available as a baseline.",
+        "target": {
+          "controlId": "vcf.vcf-eg-amount",
+          "minDelta": 0.18,
+          "lowTarget": 0.25,
+          "highTarget": 0.75
+        },
+        "prerequisites": [
+          {
+            "kind": "audio-running",
+            "blocker": "Start Audio so there is something to compare."
+          },
+          {
+            "kind": "transport-running",
+            "instrumentId": "dfam",
+            "blocker": "Start the DFAM sequencer with RUN / STOP so the envelope repeats."
+          },
+          {
+            "kind": "value-at-least",
+            "instrumentId": "dfam",
+            "controlId": "vca.volume",
+            "value": 0.08,
+            "blocker": "Raise DFAM VOLUME above silence."
+          },
+          {
+            "kind": "any-of",
+            "blocker": "Raise at least one DFAM mixer source: VCO 1, VCO 2, or NOISE / EXT LEVEL.",
+            "requires": [
+              {
+                "kind": "value-at-least",
+                "instrumentId": "dfam",
+                "controlId": "mixer.vco-1-level",
+                "value": 0.08
+              },
+              {
+                "kind": "value-at-least",
+                "instrumentId": "dfam",
+                "controlId": "mixer.vco-2-level",
+                "value": 0.08
+              },
+              {
+                "kind": "all-of",
+                "requires": [
+                  {
+                    "kind": "value-at-least",
+                    "instrumentId": "dfam",
+                    "controlId": "mixer.noise-ext-level",
+                    "value": 0.08
+                  },
+                  {
+                    "kind": "no-cable-into",
+                    "instrumentId": "dfam",
+                    "jackId": "ext-audio-in"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "kind": "any-of",
+            "blocker": "Raise at least one DFAM VELOCITY step so a trigger can open the envelopes.",
+            "requires": [
+              {
+                "kind": "value-at-least",
+                "instrumentId": "dfam",
+                "controlId": "seq.velocity[0]",
+                "value": 0.05
+              },
+              {
+                "kind": "value-at-least",
+                "instrumentId": "dfam",
+                "controlId": "seq.velocity[1]",
+                "value": 0.05
+              },
+              {
+                "kind": "value-at-least",
+                "instrumentId": "dfam",
+                "controlId": "seq.velocity[2]",
+                "value": 0.05
+              },
+              {
+                "kind": "value-at-least",
+                "instrumentId": "dfam",
+                "controlId": "seq.velocity[3]",
+                "value": 0.05
+              },
+              {
+                "kind": "value-at-least",
+                "instrumentId": "dfam",
+                "controlId": "seq.velocity[4]",
+                "value": 0.05
+              },
+              {
+                "kind": "value-at-least",
+                "instrumentId": "dfam",
+                "controlId": "seq.velocity[5]",
+                "value": 0.05
+              },
+              {
+                "kind": "value-at-least",
+                "instrumentId": "dfam",
+                "controlId": "seq.velocity[6]",
+                "value": 0.05
+              },
+              {
+                "kind": "value-at-least",
+                "instrumentId": "dfam",
+                "controlId": "seq.velocity[7]",
+                "value": 0.05
+              }
+            ]
+          }
+        ],
+        "predictionPrompt": "What do you expect when the filter-envelope depth crosses its neutral point?",
+        "predictions": [
+          {
+            "id": "opposite",
+            "label": "The sweep will move the other way"
+          },
+          {
+            "id": "stronger",
+            "label": "The sweep will sound stronger"
+          },
+          {
+            "id": "unsure",
+            "label": "I am not sure yet"
+          }
+        ],
+        "instruction": "Move only VCF EG AMOUNT until the experiment recognizes a clear contrast. The neutral point is 50%; crossing it reverses the envelope's direction in this simulator.",
+        "listenFor": "Listen for whether each hit opens the filter in the same direction, the opposite direction, or with a different amount. Your description can differ from these prompts.",
+        "evidenceClass": "validated-control-change",
+        "source": {
+          "document": "DFAM_Manual.pdf",
+          "pages": "16, 18–20, 23–29",
+          "confidence": "manual-stated"
+        }
+      },
+      {
+        "id": "mother32-cutoff-resonance",
+        "title": "Hear cutoff against resonance",
+        "instrumentId": "mother32",
+        "summary": "Hold the filter cutoff in place and compare a clear resonance change without losing the starting settings.",
+        "target": {
+          "controlId": "vcf.resonance",
+          "minDelta": 0.18,
+          "lowTarget": 0.2,
+          "highTarget": 0.78
+        },
+        "prerequisites": [
+          {
+            "kind": "audio-running",
+            "blocker": "Start Audio so there is something to compare."
+          },
+          {
+            "kind": "transport-running",
+            "instrumentId": "mother32",
+            "blocker": "Start the Mother-32 sequencer so the change repeats."
+          },
+          {
+            "kind": "value-at-least",
+            "instrumentId": "mother32",
+            "controlId": "out.volume",
+            "value": 0.08,
+            "blocker": "Raise Mother-32 VOLUME above silence."
+          }
+        ],
+        "predictionPrompt": "What will higher resonance do near the current cutoff?",
+        "predictions": [
+          {
+            "id": "focus",
+            "label": "Emphasize the cutoff region"
+          },
+          {
+            "id": "thin",
+            "label": "Make the sound feel thinner"
+          },
+          {
+            "id": "unsure",
+            "label": "I am not sure yet"
+          }
+        ],
+        "instruction": "Move only RESONANCE through a clear low-to-high contrast. Leave CUTOFF fixed so you can hear their relationship.",
+        "listenFor": "Listen for a narrower, more pronounced band around the cutoff and whether loudness changes bias your preference.",
+        "evidenceClass": "validated-control-change",
+        "source": {
+          "document": "Mother_32_Users_Manual.pdf",
+          "pages": "18–19, 49",
+          "confidence": "manual-stated"
+        }
+      },
+      {
+        "id": "dfam-velocity-envelope",
+        "title": "Hear DFAM velocity shape a hit",
+        "instrumentId": "dfam",
+        "summary": "Change one sequencer velocity step and compare how strongly the same envelopes affect that hit.",
+        "target": {
+          "controlId": "seq.velocity[0]",
+          "minDelta": 0.2,
+          "lowTarget": 0.15,
+          "highTarget": 0.85
+        },
+        "prerequisites": [
+          {
+            "kind": "audio-running",
+            "blocker": "Start Audio so there is something to compare."
+          },
+          {
+            "kind": "transport-running",
+            "instrumentId": "dfam",
+            "blocker": "Start the DFAM sequencer so the change repeats."
+          },
+          {
+            "kind": "value-at-least",
+            "instrumentId": "dfam",
+            "controlId": "vca.volume",
+            "value": 0.08,
+            "blocker": "Raise DFAM VOLUME above silence."
+          },
+          {
+            "kind": "any-of",
+            "blocker": "Raise a DFAM oscillator or noise source so the velocity change has sound to shape.",
+            "requires": [
+              {
+                "kind": "value-at-least",
+                "instrumentId": "dfam",
+                "controlId": "mixer.vco-1-level",
+                "value": 0.08
+              },
+              {
+                "kind": "value-at-least",
+                "instrumentId": "dfam",
+                "controlId": "mixer.vco-2-level",
+                "value": 0.08
+              },
+              {
+                "kind": "value-at-least",
+                "instrumentId": "dfam",
+                "controlId": "mixer.noise-ext-level",
+                "value": 0.08
+              }
+            ]
+          }
+        ],
+        "predictionPrompt": "What will a high velocity do to the selected hit?",
+        "predictions": [
+          {
+            "id": "stronger",
+            "label": "Make its envelopes stronger"
+          },
+          {
+            "id": "same",
+            "label": "Leave the timbre unchanged"
+          },
+          {
+            "id": "unsure",
+            "label": "I am not sure yet"
+          }
+        ],
+        "instruction": "Move only VELOCITY step 1 between a quiet and strong value while the sequence repeats.",
+        "listenFor": "Listen for level, filter motion, and pitch-envelope depth changing together on that one step.",
+        "evidenceClass": "validated-control-change",
+        "source": {
+          "document": "DFAM_Manual.pdf",
+          "pages": "20–22, 29",
+          "confidence": "manual-stated"
+        }
+      },
+      {
+        "id": "subharmonicon-rhythm-division",
+        "title": "Hear one rhythm division move the cycle",
+        "instrumentId": "subharmonicon",
+        "summary": "Change one assigned rhythm divider and compare the new spacing and repeat horizon with the baseline.",
+        "target": {
+          "controlId": "rhythm.generator[0]",
+          "minDelta": 0.18,
+          "lowTarget": 0.2,
+          "highTarget": 0.8
+        },
+        "prerequisites": [
+          {
+            "kind": "audio-running",
+            "blocker": "Start Audio so there is something to compare."
+          },
+          {
+            "kind": "transport-running",
+            "instrumentId": "subharmonicon",
+            "blocker": "Start the Subharmonicon sequencer so the change repeats."
+          },
+          {
+            "kind": "value-at-least",
+            "instrumentId": "subharmonicon",
+            "controlId": "vca.volume",
+            "value": 0.08,
+            "blocker": "Raise Subharmonicon VOLUME above silence."
+          },
+          {
+            "kind": "value-at-least",
+            "instrumentId": "subharmonicon",
+            "controlId": "transport.eg",
+            "value": 0.25,
+            "blocker": "Set Subharmonicon EG to ON."
+          },
+          {
+            "kind": "value-at-least",
+            "instrumentId": "subharmonicon",
+            "controlId": "rhythm.generator[0].assign.seq1",
+            "value": 0.5,
+            "blocker": "Assign RHYTHM 1 to SEQ 1 so changing its division advances a sequencer."
+          }
+        ],
+        "predictionPrompt": "How will a different RHYTHM 1 division change the phrase?",
+        "predictions": [
+          {
+            "id": "spacing",
+            "label": "Change the spacing of notes"
+          },
+          {
+            "id": "horizon",
+            "label": "Change where the pattern repeats"
+          },
+          {
+            "id": "unsure",
+            "label": "I am not sure yet"
+          }
+        ],
+        "instruction": "Move only RHYTHM 1 far enough to choose a clearly different division, then inspect the repeat-horizon readout.",
+        "listenFor": "Listen for the changed interval between SEQ 1 steps and the point where the full polyrhythm meets again.",
+        "evidenceClass": "validated-control-change",
+        "source": {
+          "document": "Subharmonicon_Manual AMZ.pdf",
+          "pages": "24–26",
+          "confidence": "manual-stated"
+        }
+      },
+      {
+        "id": "cross-lfo-rate",
+        "title": "Let Mother-32 LFO sweep DFAM",
+        "instrumentId": "mother32",
+        "summary": "With Mother-32 LFO patched to DFAM filter modulation, compare slow and fast automatic sweeps.",
+        "target": {
+          "controlId": "lfo.lfo-rate",
+          "minDelta": 0.2,
+          "lowTarget": 0.18,
+          "highTarget": 0.78
+        },
+        "prerequisites": [
+          {
+            "kind": "audio-running",
+            "blocker": "Start Audio so there is something to compare."
+          },
+          {
+            "kind": "transport-running",
+            "instrumentId": "dfam",
+            "blocker": "Start the DFAM sequencer so the change repeats."
+          },
+          {
+            "kind": "cable-present",
+            "from": {
+              "instrumentId": "mother32",
+              "jackId": "lfo-triangle-out"
+            },
+            "to": {
+              "instrumentId": "dfam",
+              "jackId": "vcf-mod-in"
+            },
+            "blocker": "Patch Mother-32 LFO TRI into DFAM VCF MOD so the cross-instrument route exists."
+          },
+          {
+            "kind": "value-at-least",
+            "instrumentId": "dfam",
+            "controlId": "vcf.noise-vcf-mod",
+            "value": 0.15,
+            "blocker": "Raise DFAM NOISE / VCF MOD so the patched LFO has audible depth."
+          },
+          {
+            "kind": "value-at-least",
+            "instrumentId": "dfam",
+            "controlId": "vca.volume",
+            "value": 0.08,
+            "blocker": "Raise DFAM VOLUME above silence."
+          }
+        ],
+        "predictionPrompt": "What changes when the same LFO sweep becomes faster?",
+        "predictions": [
+          {
+            "id": "motion",
+            "label": "The filter motion speeds up"
+          },
+          {
+            "id": "tone",
+            "label": "It becomes more like a tone"
+          },
+          {
+            "id": "unsure",
+            "label": "I am not sure yet"
+          }
+        ],
+        "instruction": "Move only Mother-32 LFO RATE from a slow sweep toward a much faster one.",
+        "listenFor": "Listen for separate filter movement becoming a tremble or audio-rate color as the modulation speeds up.",
+        "evidenceClass": "validated-control-change",
+        "source": {
+          "document": "Mother_32_Users_Manual.pdf",
+          "pages": "17–18, 48–49",
+          "confidence": "manual-stated"
+        }
+      },
+      {
+        "id": "repair-inactive-dfam-filter-route",
+        "title": "Wake up an inactive modulation route",
+        "instrumentId": "dfam",
+        "summary": "Use a known LFO-to-filter cable and find the depth control that can make a correctly patched route seem inactive.",
+        "target": {
+          "controlId": "vcf.noise-vcf-mod",
+          "minDelta": 0.18,
+          "lowTarget": 0.05,
+          "highTarget": 0.75
+        },
+        "prerequisites": [
+          {
+            "kind": "audio-running",
+            "blocker": "Start Audio so there is something to compare."
+          },
+          {
+            "kind": "transport-running",
+            "instrumentId": "dfam",
+            "blocker": "Start the DFAM sequencer so the change repeats."
+          },
+          {
+            "kind": "cable-present",
+            "from": {
+              "instrumentId": "mother32",
+              "jackId": "lfo-triangle-out"
+            },
+            "to": {
+              "instrumentId": "dfam",
+              "jackId": "vcf-mod-in"
+            },
+            "blocker": "Patch Mother-32 LFO TRI into DFAM VCF MOD so the cross-instrument route exists."
+          },
+          {
+            "kind": "value-at-least",
+            "instrumentId": "dfam",
+            "controlId": "vca.volume",
+            "value": 0.08,
+            "blocker": "Raise DFAM VOLUME above silence."
+          }
+        ],
+        "predictionPrompt": "What will happen when the route depth rises from near zero?",
+        "predictions": [
+          {
+            "id": "appear",
+            "label": "The filter sweep will appear"
+          },
+          {
+            "id": "subtle",
+            "label": "Only the tone color will shift"
+          },
+          {
+            "id": "unsure",
+            "label": "I am not sure yet"
+          }
+        ],
+        "instruction": "The cable is present. Move only NOISE / VCF MOD from near zero to a clear positive depth.",
+        "listenFor": "Listen for the point where the route becomes active; if nothing changes, use No difference so coaching checks the remaining setup.",
+        "evidenceClass": "validated-control-change",
+        "source": {
+          "document": "DFAM_Manual.pdf",
+          "pages": "19, 27",
+          "confidence": "manual-stated"
+        }
       }
     ]
   },

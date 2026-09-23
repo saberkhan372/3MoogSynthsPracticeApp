@@ -3,6 +3,7 @@
 window.MOOG_MOTHER32_EDITOR = Object.freeze({
   create({ getBank, onChange, onToggle }) {
     const api = window.MOOG_MOTHER32_PATTERNS;
+    const clone = value => JSON.parse(JSON.stringify(value));
     const element = document.createElement('details');
     element.id = 'mother32PatternEditor';
     element.className = 'pattern-editor';
@@ -96,9 +97,10 @@ window.MOOG_MOTHER32_EDITOR = Object.freeze({
         row.addEventListener('change', event => {
           const key = event.target.dataset.field;
           if (!key) return;
+          const before = clone(getBank());
           editable().steps[index][key] = event.target.type === 'checkbox'
             ? event.target.checked : Number(event.target.value);
-          onChange(false);
+          onChange(false, before);
         });
         steps.append(row);
       }
@@ -114,17 +116,19 @@ window.MOOG_MOTHER32_EDITOR = Object.freeze({
       renderSteps();
     }
     function selectPattern() {
+      const before = clone(getBank());
       getBank().selected = Number(bankSelect.value) * 8 + Number(slotSelect.value);
       page = 0;
       refresh();
-      onChange(true);
+      onChange(true, before);
     }
     bankSelect.addEventListener('change', selectPattern);
     slotSelect.addEventListener('change', selectPattern);
     length.addEventListener('change', () => {
+      const before = clone(getBank());
       editable().length = Number(length.value);
       renderSteps();
-      onChange(false);
+      onChange(false, before);
     });
     previous.addEventListener('click', () => { page--; renderSteps(); });
     next.addEventListener('click', () => { page++; renderSteps(); });
